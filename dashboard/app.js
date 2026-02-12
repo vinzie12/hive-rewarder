@@ -132,6 +132,7 @@ async function loadDashboard() {
 
     // Also include delegators in balances but not in today's payout
     for (const [name, data] of Object.entries(balances)) {
+      if (name === '_meta') continue;
       if (!payoutSummary.delegators.find(d => d.name === name)) {
         const initial = name.charAt(0).toUpperCase();
         const tr = document.createElement('tr');

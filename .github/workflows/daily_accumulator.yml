@@ -42,7 +42,6 @@ jobs:
           if [ -f data/delegator_balances.json ]; then FILES_TO_COMMIT="$FILES_TO_COMMIT data/delegator_balances.json"; fi
           if [ -f data/sbi_log.json ]; then FILES_TO_COMMIT="$FILES_TO_COMMIT data/sbi_log.json"; fi
           if [ -f data/payout_summary.json ]; then FILES_TO_COMMIT="$FILES_TO_COMMIT data/payout_summary.json"; fi
-          if [ -f data/payout_history.json ]; then FILES_TO_COMMIT="$FILES_TO_COMMIT data/payout_history.json"; fi
           if [ -n "$FILES_TO_COMMIT" ]; then
             git add $FILES_TO_COMMIT
             git commit -m "🤖 Update reward data [auto]" || echo "No changes to commit"

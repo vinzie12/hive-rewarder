@@ -31,6 +31,13 @@ async function accumulate() {
   const balances = loadJSON('delegator_balances.json', {});
   const today = getTodayUTC();
 
+  // Guard: skip if we already accumulated this payout date
+  const meta = balances._meta || {};
+  if (meta.last_accumulated_date === date) {
+    log(`⚠️ Already accumulated rewards for ${date}. Skipping to prevent double-counting.`);
+    return;
+  }
+
   // Step 4: Apply multiplier and accumulate balances
   log('\n📋 Processing delegator rewards:');
   log('─'.repeat(60));
@@ -58,6 +65,7 @@ async function accumulate() {
   log('─'.repeat(60));
 
   // Step 5: Save updated balances before SBI processing
+  balances._meta = { last_accumulated_date: date };
   saveJSON('delegator_balances.json', balances);
 
   // Step 6: Process SBI payouts (sends 1-HIVE chunks where balance >= 1)
