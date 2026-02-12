@@ -30,6 +30,21 @@
         <span>Loading...</span>
       </div>
     </div>
+    <!-- Tab Navigation -->
+    <div class="header-tabs">
+      <button class="tab-btn tab-btn--active" data-tab="delegators">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Delegators
+      </button>
+      <button class="tab-btn" data-tab="chart">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Chart
+      </button>
+      <button class="tab-btn" data-tab="sbi">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        SBI Log
+      </button>
+    </div>
   </header>
 
   <!-- Loading State -->
@@ -93,70 +108,82 @@
       </div>
     </div>
 
-    <!-- Delegator Rewards Table -->
-    <div class="section">
-      <div class="section-header">
-        <h2>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-          Delegator Rewards
-        </h2>
-        <div class="search-box">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="search-input" placeholder="Search delegator..." />
+    <!-- Tab Content Panels -->
+    <div class="tab-content">
+      <!-- Delegators Tab -->
+      <div class="tab-panel tab-panel--active" data-panel="delegators">
+        <div class="section">
+          <div class="section-header">
+            <h2>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              Delegator Rewards
+            </h2>
+            <div class="search-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="search-input" placeholder="Search delegator..." />
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Delegator</th>
+                  <th>HP Delegated</th>
+                  <th>Share</th>
+                  <th>Base Reward</th>
+                  <th>Adjusted Reward</th>
+                  <th>Balance</th>
+                  <th>Total Sent</th>
+                </tr>
+              </thead>
+              <tbody id="delegator-tbody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Delegator</th>
-              <th>HP Delegated</th>
-              <th>Share</th>
-              <th>Base Reward</th>
-              <th>Adjusted Reward</th>
-              <th>Balance</th>
-              <th>Total Sent</th>
-            </tr>
-          </thead>
-          <tbody id="delegator-tbody"></tbody>
-        </table>
-      </div>
-    </div>
 
-    <!-- Accumulated Rewards Chart -->
-    <div class="section">
-      <div class="section-header">
-        <h2>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-          Reward Distribution
-        </h2>
+      <!-- Chart Tab -->
+      <div class="tab-panel" data-panel="chart">
+        <div class="section">
+          <div class="section-header">
+            <h2>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              Reward Distribution
+            </h2>
+          </div>
+          <div class="chart-selector">
+            <div class="chart-dates" id="chart-dates"></div>
+          </div>
+          <div class="chart-container">
+            <div class="bar-chart" id="bar-chart"></div>
+          </div>
+        </div>
       </div>
-      <div class="chart-container">
-        <div class="bar-chart" id="bar-chart"></div>
-      </div>
-    </div>
 
-    <!-- SBI Transaction Log -->
-    <div class="section">
-      <div class="section-header">
-        <h2>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
-          Recent SBI Transactions
-        </h2>
-      </div>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Delegator</th>
-              <th>Amount</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="sbi-tbody"></tbody>
-        </table>
+      <!-- SBI Log Tab -->
+      <div class="tab-panel" data-panel="sbi">
+        <div class="section">
+          <div class="section-header">
+            <h2>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+              Recent SBI Transactions
+            </h2>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Delegator</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="sbi-tbody"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
 

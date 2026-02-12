@@ -109,6 +109,46 @@ body {
   justify-content: space-between;
 }
 
+.header-tabs {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  gap: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.85rem 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  position: relative;
+  border-bottom: 2px solid transparent;
+}
+
+.tab-btn:hover {
+  color: var(--text-primary);
+}
+
+.tab-btn--active {
+  color: var(--blue);
+  border-bottom-color: var(--blue);
+}
+
+.tab-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
 .logo {
   display: flex;
   align-items: center;
@@ -277,6 +317,61 @@ body {
 .stat-card--curation .stat-value { color: var(--purple); }
 .stat-card--multiplier .stat-value { color: var(--orange); }
 .stat-card--delegators .stat-value { color: var(--accent); }
+
+/* ─── Tab Content ─── */
+.tab-content {
+  width: 100%;
+}
+
+.tab-panel {
+  display: none;
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+.tab-panel--active {
+  display: block;
+}
+
+/* ─── Chart Selector ─── */
+.chart-selector {
+  margin-bottom: 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+
+.chart-dates {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.chart-date-btn {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.chart-date-btn:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.chart-date-btn--active {
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  border-color: var(--blue);
+  color: #fff;
+  box-shadow: 0 0 12px rgba(66, 153, 225, 0.3);
+}
 
 /* ─── Sections ─── */
 .section {

@@ -42,10 +42,11 @@ async function loadDashboard() {
   const statusBadge = document.getElementById('header-status');
 
   try {
-    const [payoutSummary, balances, sbiLog] = await Promise.all([
+    const [payoutSummary, balances, sbiLog, payoutHistory] = await Promise.all([
       loadJSON('payout_summary.json'),
       loadJSON('delegator_balances.json'),
-      loadJSON('sbi_log.json')
+      loadJSON('sbi_log.json'),
+      loadJSON('payout_history.json')
     ]);
 
     if (!payoutSummary || !balances) {
@@ -172,8 +173,39 @@ async function loadDashboard() {
       });
     });
 
-    // Render bar chart
-    renderChart(chartData);
+    // Build chart data by date from payout history
+    const chartByDate = {};
+    if (payoutHistory && Array.isArray(payoutHistory)) {
+      for (const payout of payoutHistory) {
+        chartByDate[payout.date] = payout.delegators || [];
+      }
+    }
+    // Add today's data
+    if (payoutSummary && payoutSummary.delegators) {
+      chartByDate[payoutSummary.date] = payoutSummary.delegators;
+    }
+
+    // Render chart date selector
+    const chartDatesContainer = document.getElementById('chart-dates');
+    const dates = Object.keys(chartByDate).sort().reverse();
+    let selectedDate = dates[0] || payoutSummary.date;
+
+    for (const date of dates) {
+      const btn = document.createElement('button');
+      btn.className = `chart-date-btn ${date === selectedDate ? 'chart-date-btn--active' : ''}`;
+      btn.textContent = formatDate(date);
+      btn.dataset.date = date;
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.chart-date-btn').forEach(b => b.classList.remove('chart-date-btn--active'));
+        btn.classList.add('chart-date-btn--active');
+        selectedDate = date;
+        renderChartForDate(chartByDate[date] || []);
+      });
+      chartDatesContainer.appendChild(btn);
+    }
+
+    // Render initial chart
+    renderChartForDate(chartByDate[selectedDate] || []);
 
     // SBI Log
     const sbiTbody = document.getElementById('sbi-tbody');
@@ -200,6 +232,24 @@ async function loadDashboard() {
       sbiTbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-secondary); padding: 2rem;">No SBI transactions yet.</td></tr>';
     }
 
+    // Tab switching logic
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabName = btn.dataset.tab;
+
+        // Remove active from all buttons and panels
+        tabBtns.forEach(b => b.classList.remove('tab-btn--active'));
+        tabPanels.forEach(p => p.classList.remove('tab-panel--active'));
+
+        // Add active to clicked button and corresponding panel
+        btn.classList.add('tab-btn--active');
+        document.querySelector(`[data-panel="${tabName}"]`).classList.add('tab-panel--active');
+      });
+    });
+
   } catch (err) {
     console.error('Dashboard error:', err);
     loadingEl.innerHTML = `
@@ -211,32 +261,31 @@ async function loadDashboard() {
   }
 }
 
-function renderChart(data) {
+function renderChartForDate(delegators) {
   const container = document.getElementById('bar-chart');
   container.innerHTML = '';
 
-  // Sort by HP descending, filter out zero
-  const sorted = data.filter(d => d.balance + d.totalSent > 0 || d.hp > 0)
-    .sort((a, b) => b.hp - a.hp);
-
-  if (sorted.length === 0) {
-    container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 2rem;">No reward data to display.</p>';
+  if (!delegators || delegators.length === 0) {
+    container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 2rem;">No reward data for this date.</p>';
     return;
   }
 
-  const maxVal = Math.max(...sorted.map(d => d.balance + d.totalSent), 0.001);
+  // Sort by reward descending
+  const sorted = [...delegators].sort((a, b) => (b.base_reward || 0) - (a.base_reward || 0));
+
+  const maxVal = Math.max(...sorted.map(d => d.base_reward || 0), 0.001);
 
   for (const d of sorted) {
-    const total = d.balance + d.totalSent;
-    const heightPercent = Math.max((total / maxVal) * 100, 2);
+    const reward = d.base_reward || 0;
+    const heightPercent = Math.max((reward / maxVal) * 100, 2);
 
     const group = document.createElement('div');
     group.className = 'bar-group';
 
     group.innerHTML = `
-      <div class="bar-value">${total > 0 ? total.toFixed(1) : '0'}</div>
+      <div class="bar-value">${reward > 0 ? reward.toFixed(2) : '0'}</div>
       <div class="bar" style="height: ${heightPercent}%">
-        <div class="bar-tooltip">@${d.name}<br>Balance: ${d.balance.toFixed(3)}<br>Sent: ${d.totalSent.toFixed(3)}<br>HP: ${d.hp.toLocaleString()}</div>
+        <div class="bar-tooltip">@${d.name}<br>HP: ${d.hp.toLocaleString()}<br>Reward: ${reward.toFixed(3)} HIVE</div>
       </div>
       <div class="bar-label">@${d.name}</div>
     `;
