@@ -294,30 +294,71 @@ async function main() {
       process.exit(0);
     }
 
-    // Calculate total HP
-    let totalHP = 0;
-    for (const hp of Object.values(activeDelegators)) {
-      totalHP += hp;
-    }
-
     // Fetch curation rewards (last 24h)
     const totalCurationHive = await getCurationRewards(rawHistory, totalVestingFundHive, totalVestingShares);
     log(`📊 Total curation rewards (last 24h): ${totalCurationHive.toFixed(6)} HIVE`);
 
-    // Distribute 95% of curation rewards proportionally to delegators
+    // Apply 6-day eligibility cutoff (same as reference payout.js)
+    const phTz = 'Asia/Manila';
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: phTz }));
+    now.setHours(0, 0, 0, 0); // midnight Manila
+    const cutoff = now.getTime() - 6 * 24 * 60 * 60 * 1000; // 6 days ago
+
+    log(`\n⏰ Eligibility cutoff: ${new Date(cutoff).toISOString()} (6 days ago)`);
+
+    // Calculate eligible delegators (delegated at least 6 days ago)
+    const eligibleDelegators = {};
+    let eligibleTotalHP = 0;
+
+    for (const [delegator, events] of Object.entries(delegationHistory)) {
+      const sortedEvents = [...events].sort((a, b) => a.timestamp - b.timestamp);
+      let runningBalance = 0;
+      let eligibleVests = 0;
+
+      for (const event of sortedEvents) {
+        const eventTime = event.timestamp;
+        const beforeBalance = runningBalance;
+        runningBalance += event.vests;
+
+        const isEventEligible = eventTime <= cutoff;
+
+        if (isEventEligible) {
+          eligibleVests = Math.max(0, runningBalance);
+        }
+      }
+
+      const currentDelegation = Math.max(0, runningBalance);
+      eligibleVests = Math.min(eligibleVests, currentDelegation);
+
+      if (eligibleVests > 0) {
+        const eligibleHP = vestsToHP(eligibleVests, totalVestingFundHive, totalVestingShares);
+        eligibleDelegators[delegator] = eligibleHP;
+        eligibleTotalHP += eligibleHP;
+      }
+    }
+
+    log(`👥 Eligible delegators (6+ days): ${Object.keys(eligibleDelegators).length}`);
+    log(`📈 Total eligible delegation (HP): ${eligibleTotalHP.toFixed(3)} HP`);
+
+    if (eligibleTotalHP === 0) {
+      log('⚠️ No eligible delegations found.');
+      process.exit(0);
+    }
+
+    // Distribute 95% of curation rewards proportionally to eligible delegators
     const distributable = totalCurationHive * 0.95;
 
     // Build delegator list with base rewards
     const delegatorData = [];
 
-    log('\n📋 Delegator Rewards:');
+    log('\n📋 Eligible Delegator Rewards:');
     log('─'.repeat(60));
 
     // Sort by HP descending
-    const sortedDelegators = Object.entries(activeDelegators).sort((a, b) => b[1] - a[1]);
+    const sortedDelegators = Object.entries(eligibleDelegators).sort((a, b) => b[1] - a[1]);
 
     for (const [delegator, hp] of sortedDelegators) {
-      const share = hp / totalHP;
+      const share = hp / eligibleTotalHP;
       const baseReward = parseFloat((distributable * share).toFixed(6));
 
       delegatorData.push({
@@ -335,7 +376,7 @@ async function main() {
     // Create payout summary
     const payoutSummary = {
       date: getTodayUTC(),
-      total_delegation_hp: parseFloat(totalHP.toFixed(3)),
+      total_delegation_hp: parseFloat(eligibleTotalHP.toFixed(3)),
       total_curation_hive: parseFloat(totalCurationHive.toFixed(6)),
       distributable_hive: parseFloat(distributable.toFixed(6)),
       delegators: delegatorData
@@ -345,8 +386,10 @@ async function main() {
     saveJSON('payout_summary.json', payoutSummary);
 
     log(`\n📊 Summary:`);
-    log(`   Total delegation: ${totalHP.toFixed(3)} HP`);
+    log(`   Total active delegation: ${Object.values(activeDelegators).reduce((a, b) => a + b, 0).toFixed(3)} HP`);
+    log(`   Eligible delegation (6+ days): ${eligibleTotalHP.toFixed(3)} HP`);
     log(`   Active delegators: ${activeCount}`);
+    log(`   Eligible delegators: ${Object.keys(eligibleDelegators).length}`);
     log(`   Total curation (24h): ${totalCurationHive.toFixed(6)} HIVE`);
     log(`   Distributable (95%): ${distributable.toFixed(6)} HIVE`);
     log(`   Retained (5%): ${(totalCurationHive * 0.05).toFixed(6)} HIVE`);
