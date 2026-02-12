@@ -83,11 +83,18 @@ function initSyncDB() {
   db.exec(`
     CREATE TABLE IF NOT EXISTS sync_state (
       id INTEGER PRIMARY KEY CHECK (id = 1),
-      last_index INTEGER
+      last_index INTEGER,
+      last_curation_end INTEGER
     );
-    INSERT OR IGNORE INTO sync_state (id, last_index) VALUES (1, 0);
+    INSERT OR IGNORE INTO sync_state (id, last_index, last_curation_end) VALUES (1, 0, 0);
   `);
-  log(`� Sync database initialized: ${DB_PATH}`);
+  // Migrate: add last_curation_end if missing (existing DBs)
+  const cols = db.pragma('table_info(sync_state)');
+  if (!cols.find(c => c.name === 'last_curation_end')) {
+    db.exec('ALTER TABLE sync_state ADD COLUMN last_curation_end INTEGER DEFAULT 0;');
+    log(`💾 Migrated sync_state: added last_curation_end column`);
+  }
+  log(`💾 Sync database initialized: ${DB_PATH}`);
   return db;
 }
 
@@ -96,9 +103,15 @@ function getLastIndex(db) {
   return row && row.last_index != null ? row.last_index : 0;
 }
 
-function updateLastIndex(db, index) {
-  db.prepare('UPDATE sync_state SET last_index = ? WHERE id = 1').run(index);
-  log(`� Updated last processed index to: ${index}`);
+function getLastCurationEnd(db) {
+  const row = db.prepare('SELECT last_curation_end FROM sync_state WHERE id = 1').get();
+  return row && row.last_curation_end != null ? row.last_curation_end : 0;
+}
+
+function updateSyncState(db, index, curationEnd) {
+  db.prepare('UPDATE sync_state SET last_index = ?, last_curation_end = ? WHERE id = 1').run(index, curationEnd);
+  log(`💾 Updated last processed index to: ${index}`);
+  log(`💾 Updated last curation window end to: ${new Date(curationEnd).toISOString()}`);
 }
 
 // ─── Incremental Account History Sync ───────────────────────────────
@@ -312,29 +325,45 @@ function getActiveDelegators(delegationHistory) {
   return active;
 }
 
-// ─── Fetch Claimed Curation Rewards (last 24h) ─────────────────────
+// ─── Fetch Claimed Curation Rewards (with multi-day gap recovery) ───
 
-async function getCurationRewards(rawHistory, totalVestingFundHive, totalVestingShares) {
+async function getCurationRewards(rawHistory, totalVestingFundHive, totalVestingShares, lastCurationEnd) {
   const phTz = 'Asia/Manila';
   
   // Get current time in Manila timezone
   const now = new Date(new Date().toLocaleString('en-US', { timeZone: phTz }));
   
-  // Curation window: 8:00 AM yesterday to 8:00 AM today (Manila time)
-  const end = new Date(now);
-  end.setHours(8, 0, 0, 0);
-  const start = new Date(end);
-  start.setDate(start.getDate() - 1);
+  // Today's curation window end: 8:00 AM today (Manila time)
+  const todayEnd = new Date(now);
+  todayEnd.setHours(8, 0, 0, 0);
   
   // Convert Manila time to UTC by calculating the offset
   const utcNow = new Date();
   const manilaOffset = now.getTime() - utcNow.getTime();
   
-  const fromTime = start.getTime() - manilaOffset;
-  const toTime = end.getTime() - manilaOffset;
+  const toTime = todayEnd.getTime() - manilaOffset;
 
-  log(`⏰ Curation window (Manila): ${start.toISOString().split('T')[0]} 08:00 → ${end.toISOString().split('T')[0]} 08:00`);
+  // Determine curation window start:
+  // If lastCurationEnd > 0, resume from where we left off (covers missed days)
+  // If lastCurationEnd === 0 (first run), default to yesterday 8AM Manila
+  let fromTime;
+  if (lastCurationEnd > 0) {
+    fromTime = lastCurationEnd;
+  } else {
+    const defaultStart = new Date(todayEnd);
+    defaultStart.setDate(defaultStart.getDate() - 1);
+    fromTime = defaultStart.getTime() - manilaOffset;
+  }
+
+  // Safety: don't scan into the future
+  if (fromTime >= toTime) {
+    log(`⏰ Curation window already processed up to: ${new Date(toTime).toISOString()}`);
+    return { totalHive: 0, windowEnd: toTime };
+  }
+
+  const missedDays = Math.round((toTime - fromTime) / (24 * 60 * 60 * 1000));
   log(`⏰ Curation window (UTC): ${new Date(fromTime).toISOString()} → ${new Date(toTime).toISOString()}`);
+  log(`⏰ Covering ${missedDays} day(s) of curation rewards${missedDays > 1 ? ' (includes missed days)' : ''}`);
 
   let totalVests = 0;
   let claimCount = 0;
@@ -356,7 +385,7 @@ async function getCurationRewards(rawHistory, totalVestingFundHive, totalVesting
   log(`  📊 Total claims in window: ${claimCount}`);
 
   const totalHive = vestsToHP(totalVests, totalVestingFundHive, totalVestingShares);
-  return totalHive;
+  return { totalHive, windowEnd: toTime };
 }
 
 // ─── Main ───────────────────────────────────────────────────────────
@@ -369,7 +398,9 @@ async function main() {
     // Initialize sync database and get last processed index
     db = initSyncDB();
     const lastIndex = getLastIndex(db);
+    const lastCurationEnd = getLastCurationEnd(db);
     log(`📊 Last processed index from DB: ${lastIndex}`);
+    log(`📊 Last curation window end from DB: ${lastCurationEnd > 0 ? new Date(lastCurationEnd).toISOString() : 'none (first run)'}`);
 
     await pickWorkingNode();
 
@@ -421,14 +452,14 @@ async function main() {
 
     if (activeCount === 0) {
       log('⚠️ No active delegators found.');
-      updateLastIndex(db, latestIndex);
+      updateSyncState(db, latestIndex, lastCurationEnd);
       db.close();
       process.exit(0);
     }
 
-    // Fetch curation rewards (last 24h) - scans new operations
-    const totalCurationHive = await getCurationRewards(newOperations, totalVestingFundHive, totalVestingShares);
-    log(`📊 Total curation rewards (last 24h): ${totalCurationHive.toFixed(6)} HIVE`);
+    // Fetch curation rewards (with multi-day gap recovery)
+    const { totalHive: totalCurationHive, windowEnd: curationWindowEnd } = await getCurationRewards(newOperations, totalVestingFundHive, totalVestingShares, lastCurationEnd);
+    log(`📊 Total curation rewards: ${totalCurationHive.toFixed(6)} HIVE`);
 
     // Apply 6-day eligibility cutoff (same as reference payout.js)
     const phTz = 'Asia/Manila';
@@ -474,7 +505,7 @@ async function main() {
 
     if (eligibleTotalHP === 0) {
       log('⚠️ No eligible delegations found.');
-      updateLastIndex(db, latestIndex);
+      updateSyncState(db, latestIndex, curationWindowEnd);
       db.close();
       process.exit(0);
     }
@@ -524,12 +555,12 @@ async function main() {
     log(`   Eligible delegation (6+ days): ${eligibleTotalHP.toFixed(3)} HP`);
     log(`   Active delegators: ${activeCount}`);
     log(`   Eligible delegators: ${Object.keys(eligibleDelegators).length}`);
-    log(`   Total curation (24h): ${totalCurationHive.toFixed(6)} HIVE`);
+    log(`   Total curation: ${totalCurationHive.toFixed(6)} HIVE`);
     log(`   Distributable (95%): ${distributable.toFixed(6)} HIVE`);
     log(`   Retained (5%): ${(totalCurationHive * 0.05).toFixed(6)} HIVE`);
 
     // ── Crash-safe: update sync state ONLY after full success ──
-    updateLastIndex(db, latestIndex);
+    updateSyncState(db, latestIndex, curationWindowEnd);
     db.close();
 
     log(`\n✅ payout_summary.json and delegation_history.json updated!`);
