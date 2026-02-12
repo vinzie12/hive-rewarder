@@ -21,11 +21,20 @@ const ACCOUNT = process.env.HIVE_USER || 'bayanihive';
 const DELEGATION_HISTORY_FILE = path.join(__dirname, '..', 'data', 'delegation_history.json');
 
 const API_NODES = [
-  'https://api.hive.blog',
+  'https://api.deathwing.me',
   'https://api.openhive.network',
+  'https://api.hive.blog',
   'https://anyx.io',
+  'https://hive.roelandp.nl',
   'https://rpc.ausbit.dev',
-  'https://hived.privex.io',
+  'https://hived.emre.sh',
+  'https://hive-api.arcange.eu',
+  'https://api.c0ff33a.uk',
+  'https://rpc.ecency.com',
+  'https://techcoderx.com',
+  'https://api.hive.blue',
+  'https://rpc.mahdiyari.info',
+  'https://herpc.dtools.dev',
 ];
 
 // ─── Node Management ────────────────────────────────────────────────
