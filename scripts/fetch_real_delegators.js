@@ -16,9 +16,11 @@ const hive = require('@hiveio/hive-js');
 const fs = require('fs');
 const path = require('path');
 const { saveJSON, getTodayUTC, log } = require('./utils');
+const Database = require('better-sqlite3');
 
 const ACCOUNT = process.env.HIVE_USER || 'bayanihive';
 const DELEGATION_HISTORY_FILE = path.join(__dirname, '..', 'data', 'delegation_history.json');
+const DB_PATH = path.join(__dirname, '..', 'data', 'sync.db');
 
 const API_NODES = [
   'https://api.deathwing.me',
@@ -73,86 +75,104 @@ async function fetchGlobalProps() {
   });
 }
 
-// ─── Fetch Account History ──────────────────────────────────────────
+// ─── SQLite Sync State ──────────────────────────────────────────────
 
-async function fetchAccountHistory() {
-  let latestIndex = await new Promise((resolve, reject) => {
+function initSyncDB() {
+  const db = new Database(DB_PATH);
+  db.pragma('journal_mode = WAL');
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS sync_state (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      last_index INTEGER
+    );
+    INSERT OR IGNORE INTO sync_state (id, last_index) VALUES (1, 0);
+  `);
+  log(`� Sync database initialized: ${DB_PATH}`);
+  return db;
+}
+
+function getLastIndex(db) {
+  const row = db.prepare('SELECT last_index FROM sync_state WHERE id = 1').get();
+  return row && row.last_index != null ? row.last_index : 0;
+}
+
+function updateLastIndex(db, index) {
+  db.prepare('UPDATE sync_state SET last_index = ? WHERE id = 1').run(index);
+  log(`� Updated last processed index to: ${index}`);
+}
+
+// ─── Incremental Account History Sync ───────────────────────────────
+
+async function syncAccountHistory(lastIndex) {
+  const latestIndex = await new Promise((resolve, reject) => {
     hive.api.getAccountHistory(ACCOUNT, -1, 1, (err, res) => {
       if (err) return reject(err);
       resolve(res[0][0]);
     });
   });
 
-  log(`📊 Latest operation index: ${latestIndex}`);
+  log(`📊 Latest blockchain index: ${latestIndex}`);
+  log(`📊 Last processed index: ${lastIndex}`);
 
-  const rawHistory = [];
+  if (latestIndex <= lastIndex) {
+    log(`✅ No new operations. (latest: ${latestIndex}, last processed: ${lastIndex})`);
+    return { newOperations: [], latestIndex, hasNew: false };
+  }
 
-  if (latestIndex < 999) {
-    log(`📦 Account has ${latestIndex + 1} operations, fetching all at once...`);
+  const newCount = latestIndex - lastIndex;
+  log(`📦 ${newCount} new operation(s) to fetch (index ${lastIndex + 1} → ${latestIndex})`);
+
+  const newOperations = [];
+  const limit = 1000;
+  let start = latestIndex;
+  let fetchedCount = 0;
+
+  while (true) {
+    const batchSize = Math.min(limit, start - lastIndex);
+    if (batchSize <= 0) break;
+
+    log(`🔄 Fetching operations from index ${start} (limit: ${batchSize})`);
+
     const history = await new Promise((resolve, reject) => {
-      hive.api.getAccountHistory(ACCOUNT, -1, latestIndex + 1, (err, res) => {
+      hive.api.getAccountHistory(ACCOUNT, start, batchSize, (err, res) => {
         if (err) return reject(err);
         resolve(res);
       });
     });
-    if (history && history.length > 0) {
-      rawHistory.push(...history);
+
+    if (!history || history.length === 0) {
+      log(`✅ No more operations found`);
+      break;
     }
-  } else {
-    log(`📦 Account has ${latestIndex + 1} operations, using pagination...`);
-    let limit = 1000;
-    let start = latestIndex;
-    let fetchedCount = 0;
 
-    while (true) {
-      const adjustedStart = Math.max(start, limit - 1);
-      log(`🔄 Fetching operations from index ${adjustedStart} (limit: ${limit})`);
+    const filtered = history.filter(([idx]) => idx > lastIndex);
+    newOperations.push(...filtered);
+    fetchedCount += filtered.length;
+    log(`📈 Fetched ${filtered.length} new operations (total: ${fetchedCount})`);
 
-      const history = await new Promise((resolve, reject) => {
-        hive.api.getAccountHistory(ACCOUNT, adjustedStart, limit, (err, res) => {
-          if (err) return reject(err);
-          resolve(res);
-        });
-      });
+    const lowestFetchedIdx = history[0][0];
+    if (lowestFetchedIdx <= lastIndex + 1) break;
 
-      if (!history || history.length === 0) {
-        log(`✅ No more operations found`);
-        break;
-      }
+    start = lowestFetchedIdx - 1;
+    if (start <= lastIndex) break;
 
-      rawHistory.push(...history);
-      fetchedCount += history.length;
-      log(`📈 Fetched ${history.length} operations (total: ${fetchedCount})`);
-
-      const nextStart = history[0][0] - 1;
-      if (nextStart < 0 || nextStart < limit - 1) {
-        if (nextStart >= 0) {
-          const remainingLimit = nextStart + 1;
-          log(`🔄 Fetching remaining ${remainingLimit} operations...`);
-          const remainingHistory = await new Promise((resolve, reject) => {
-            hive.api.getAccountHistory(ACCOUNT, nextStart, remainingLimit, (err, res) => {
-              if (err) return reject(err);
-              resolve(res);
-            });
-          });
-          if (remainingHistory && remainingHistory.length > 0) {
-            rawHistory.push(...remainingHistory);
-            fetchedCount += remainingHistory.length;
-            log(`📈 Fetched ${remainingHistory.length} remaining operations (total: ${fetchedCount})`);
-          }
-        }
-        break;
-      }
-
-      start = nextStart;
-      if (history.length < limit) {
-        log(`✅ Reached end of history (got ${history.length} < ${limit})`);
-        break;
-      }
+    if (history.length < batchSize) {
+      log(`✅ Reached end of available history`);
+      break;
     }
   }
 
-  return rawHistory;
+  // Sort ascending by index and deduplicate
+  newOperations.sort((a, b) => a[0] - b[0]);
+  const seen = new Set();
+  const deduped = newOperations.filter(([idx]) => {
+    if (seen.has(idx)) return false;
+    seen.add(idx);
+    return true;
+  });
+
+  log(`📈 Total new operations fetched: ${deduped.length}`);
+  return { newOperations: deduped, latestIndex, hasNew: true };
 }
 
 // ─── Build Delegation History ───────────────────────────────────────
@@ -215,6 +235,65 @@ function buildDelegationHistory(rawHistory, totalVestingFundHive, totalVestingSh
   }
 
   return delegationHistory;
+}
+
+// ─── Load Existing Delegation History ───────────────────────────────
+
+function loadExistingDelegationHistory() {
+  if (fs.existsSync(DELEGATION_HISTORY_FILE)) {
+    const data = JSON.parse(fs.readFileSync(DELEGATION_HISTORY_FILE, 'utf8'));
+    log(`💾 Loaded existing delegation_history.json (${Object.keys(data).length} delegators)`);
+    return data;
+  }
+  log(`⚠️ No existing delegation_history.json found, starting fresh`);
+  return {};
+}
+
+// ─── Merge New Delegation Events ────────────────────────────────────
+
+function mergeNewDelegationEvents(existingHistory, newOperations, totalVestingFundHive, totalVestingShares) {
+  log(`🔍 Processing ${newOperations.length} new operations for delegation events...`);
+
+  let newEventCount = 0;
+
+  for (const [, op] of newOperations) {
+    if (op.op[0] === 'delegate_vesting_shares') {
+      const { delegator, delegatee, vesting_shares } = op.op[1];
+      const timestamp = new Date(op.timestamp + 'Z').getTime();
+      const totalVests = parseFloat(vesting_shares);
+
+      if (delegatee === ACCOUNT) {
+        const hp = vestsToHP(totalVests, totalVestingFundHive, totalVestingShares);
+
+        if (!existingHistory[delegator]) {
+          existingHistory[delegator] = [];
+        }
+
+        const previousEvents = existingHistory[delegator];
+        const previousTotal = previousEvents.length > 0
+          ? previousEvents[previousEvents.length - 1].totalVests
+          : 0;
+
+        const deltaVests = totalVests - previousTotal;
+        const date = new Date(timestamp).toISOString().split('T')[0];
+
+        if (Math.abs(deltaVests) > 0.000001) {
+          existingHistory[delegator].push({
+            vests: deltaVests,
+            totalVests,
+            hp: parseFloat(hp.toFixed(3)),
+            timestamp,
+            date,
+          });
+          newEventCount++;
+          log(`📝 ${delegator}: ${deltaVests > 0 ? '+' : ''}${deltaVests.toFixed(6)} VESTS (Total: ${totalVests.toFixed(6)} VESTS, ${hp.toFixed(3)} HP) on ${date}`);
+        }
+      }
+    }
+  }
+
+  log(`📝 Merged ${newEventCount} new delegation events`);
+  return existingHistory;
 }
 
 // ─── Get Active Delegators from History ─────────────────────────────
@@ -283,8 +362,14 @@ async function getCurationRewards(rawHistory, totalVestingFundHive, totalVesting
 // ─── Main ───────────────────────────────────────────────────────────
 
 async function main() {
+  let db;
   try {
     log(`🚀 Fetching real delegators for @${ACCOUNT}...`);
+
+    // Initialize sync database and get last processed index
+    db = initSyncDB();
+    const lastIndex = getLastIndex(db);
+    log(`📊 Last processed index from DB: ${lastIndex}`);
 
     await pickWorkingNode();
 
@@ -292,6 +377,7 @@ async function main() {
     const accountInfo = await hive.api.getAccountsAsync([ACCOUNT]);
     if (!accountInfo || accountInfo.length === 0) {
       log(`❌ Account @${ACCOUNT} not found!`);
+      db.close();
       process.exit(1);
     }
     log(`✅ Account found: ${accountInfo[0].name}`);
@@ -300,11 +386,28 @@ async function main() {
     // Get global properties
     const { totalVestingFundHive, totalVestingShares } = await fetchGlobalProps();
 
-    // Fetch full account history
-    const rawHistory = await fetchAccountHistory();
+    // Incremental sync: fetch only new operations since last index
+    const { newOperations, latestIndex, hasNew } = await syncAccountHistory(lastIndex);
 
-    // Build delegation history from delegate_vesting_shares events
-    const delegationHistory = buildDelegationHistory(rawHistory, totalVestingFundHive, totalVestingShares);
+    if (!hasNew) {
+      log(`ℹ️ No new operations to process. Existing data unchanged.`);
+      db.close();
+      return;
+    }
+
+    // Build or merge delegation history
+    let delegationHistory;
+
+    if (lastIndex === 0) {
+      // Initial full sync: build delegation history from all operations
+      log(`🔄 Initial full sync: building delegation history from ${newOperations.length} operations...`);
+      delegationHistory = buildDelegationHistory(newOperations, totalVestingFundHive, totalVestingShares);
+    } else {
+      // Incremental sync: load existing history and merge new events
+      log(`🔄 Incremental sync: merging ${newOperations.length} new operations...`);
+      delegationHistory = loadExistingDelegationHistory();
+      delegationHistory = mergeNewDelegationEvents(delegationHistory, newOperations, totalVestingFundHive, totalVestingShares);
+    }
 
     // Save delegation_history.json
     fs.writeFileSync(DELEGATION_HISTORY_FILE, JSON.stringify(delegationHistory, null, 2));
@@ -318,11 +421,13 @@ async function main() {
 
     if (activeCount === 0) {
       log('⚠️ No active delegators found.');
+      updateLastIndex(db, latestIndex);
+      db.close();
       process.exit(0);
     }
 
-    // Fetch curation rewards (last 24h)
-    const totalCurationHive = await getCurationRewards(rawHistory, totalVestingFundHive, totalVestingShares);
+    // Fetch curation rewards (last 24h) - scans new operations
+    const totalCurationHive = await getCurationRewards(newOperations, totalVestingFundHive, totalVestingShares);
     log(`📊 Total curation rewards (last 24h): ${totalCurationHive.toFixed(6)} HIVE`);
 
     // Apply 6-day eligibility cutoff (same as reference payout.js)
@@ -369,6 +474,8 @@ async function main() {
 
     if (eligibleTotalHP === 0) {
       log('⚠️ No eligible delegations found.');
+      updateLastIndex(db, latestIndex);
+      db.close();
       process.exit(0);
     }
 
@@ -420,11 +527,17 @@ async function main() {
     log(`   Total curation (24h): ${totalCurationHive.toFixed(6)} HIVE`);
     log(`   Distributable (95%): ${distributable.toFixed(6)} HIVE`);
     log(`   Retained (5%): ${(totalCurationHive * 0.05).toFixed(6)} HIVE`);
+
+    // ── Crash-safe: update sync state ONLY after full success ──
+    updateLastIndex(db, latestIndex);
+    db.close();
+
     log(`\n✅ payout_summary.json and delegation_history.json updated!`);
 
   } catch (error) {
     log(`❌ Error: ${error.message}`);
     console.error(error);
+    if (db) db.close();
     process.exit(1);
   }
 }

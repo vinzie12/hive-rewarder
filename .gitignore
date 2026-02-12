@@ -16,5 +16,10 @@ Thumbs.db
 .vscode/
 .idea/
 
+# SQLite sync state
+data/sync.db
+data/sync.db-wal
+data/sync.db-shm
+
 # Build
 dist/

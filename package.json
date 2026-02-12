@@ -20,6 +20,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@hiveio/hive-js": "^1.0.0"
+    "@hiveio/hive-js": "^1.0.0",
+    "better-sqlite3": "^12.6.2"
   }
 }
