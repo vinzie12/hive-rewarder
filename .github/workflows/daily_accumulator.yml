@@ -1,0 +1,51 @@
+name: Daily Reward Accumulator
+
+on:
+  schedule:
+    - cron: '0 1 * * *'  # Runs daily at 1:00 AM UTC
+  workflow_dispatch:       # Allow manual trigger
+
+permissions:
+  contents: write          # Required to commit and push changes
+
+jobs:
+  accumulate:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Fetch rewards
+        run: node scripts/fetch_rewards.js
+
+      - name: Run accumulator
+        run: node scripts/accumulator.js
+        env:
+          DRY_RUN: ${{ secrets.DRY_RUN }}
+          HIVE_USER: ${{ secrets.HIVE_USER }}
+          HIVE_KEY: ${{ secrets.HIVE_KEY }}
+
+      - name: Commit updated JSON files
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          FILES_TO_COMMIT=""
+          if [ -f data/delegator_balances.json ]; then FILES_TO_COMMIT="$FILES_TO_COMMIT data/delegator_balances.json"; fi
+          if [ -f data/sbi_log.json ]; then FILES_TO_COMMIT="$FILES_TO_COMMIT data/sbi_log.json"; fi
+          if [ -f data/payout_summary.json ]; then FILES_TO_COMMIT="$FILES_TO_COMMIT data/payout_summary.json"; fi
+          if [ -n "$FILES_TO_COMMIT" ]; then
+            git add $FILES_TO_COMMIT
+            git commit -m "🤖 Update reward data [auto]" || echo "No changes to commit"
+            git push
+          else
+            echo "📭 No files to commit."
+          fi

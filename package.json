@@ -1,0 +1,25 @@
+{
+  "name": "hive-rewarder",
+  "version": "1.0.0",
+  "description": "Delegator dashboard and reward accumulator for @bayanihive, showing daily rewards, applied multipliers, accumulated balances, and SBI payouts.",
+  "main": "scripts/accumulator.js",
+  "scripts": {
+    "fetch": "node scripts/fetch_rewards.js",
+    "accumulate": "node scripts/accumulator.js",
+    "send": "node scripts/send_sbi.js",
+    "run-all": "node scripts/fetch_rewards.js && node scripts/accumulator.js && node scripts/send_sbi.js"
+  },
+  "keywords": [
+    "hive",
+    "blockchain",
+    "delegation",
+    "rewards",
+    "sbi",
+    "bayanihive"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@hiveio/hive-js": "^1.0.0"
+  }
+}

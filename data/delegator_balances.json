@@ -1,0 +1,12 @@
+{
+  "deleA": {
+    "balance": 0.512,
+    "total_sent": 3.0,
+    "last_updated": "2026-02-12"
+  },
+  "deleB": {
+    "balance": 0.72,
+    "total_sent": 1.0,
+    "last_updated": "2026-02-12"
+  }
+}

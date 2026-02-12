@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hive-rewarder — @bayanihive Delegator Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <h1><span>hive-rewarder</span></h1>
+    <p>Delegator dashboard &amp; reward accumulator for @bayanihive</p>
+  </div>
+
+  <!-- Loading State -->
+  <div id="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Loading dashboard data...</p>
+  </div>
+
+  <!-- Dashboard Content (hidden until loaded) -->
+  <div id="dashboard" class="container" style="display: none;">
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="label">Date</div>
+        <div class="value blue" id="stat-date">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Total Delegation</div>
+        <div class="value green" id="stat-delegation">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Global Multiplier</div>
+        <div class="value orange" id="stat-multiplier">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Delegators</div>
+        <div class="value" id="stat-delegators">—</div>
+      </div>
+    </div>
+
+    <!-- Delegator Rewards Table -->
+    <div class="section">
+      <h2>Delegator Rewards</h2>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Delegator</th>
+              <th>Base Reward</th>
+              <th>Multiplier</th>
+              <th>Adjusted Reward</th>
+              <th>Balance</th>
+              <th>Total SBI Sent</th>
+            </tr>
+          </thead>
+          <tbody id="delegator-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Accumulated Rewards Chart -->
+    <div class="section">
+      <h2>Accumulated Rewards (Balance + Sent)</h2>
+      <div class="chart-container">
+        <div class="bar-chart" id="bar-chart"></div>
+      </div>
+    </div>
+
+    <!-- SBI Transaction Log -->
+    <div class="section">
+      <h2>Recent SBI Transactions</h2>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Delegator</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody id="sbi-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>hive-rewarder &mdash; Read-only transparency dashboard for <a href="https://peakd.com/@bayanihive" target="_blank">@bayanihive</a> delegators.</p>
+    <p>Data is updated daily via GitHub Actions. No backend required.</p>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
