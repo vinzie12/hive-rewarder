@@ -224,30 +224,48 @@ function getActiveDelegators(delegationHistory) {
   return active;
 }
 
-// ─── Fetch Curation Rewards (last 24h) ─────────────────────────────
+// ─── Fetch Claimed Curation Rewards (last 24h) ─────────────────────
 
 async function getCurationRewards(rawHistory, totalVestingFundHive, totalVestingShares) {
   const phTz = 'Asia/Manila';
+  
+  // Get current time in Manila timezone
   const now = new Date(new Date().toLocaleString('en-US', { timeZone: phTz }));
-
-  // Curation window: 8:00 AM yesterday to 7:59:59.999 AM today
+  
+  // Curation window: 8:00 AM yesterday to 8:00 AM today (Manila time)
   const end = new Date(now);
   end.setHours(8, 0, 0, 0);
   const start = new Date(end);
   start.setDate(start.getDate() - 1);
+  
+  // Convert Manila time to UTC by calculating the offset
+  const utcNow = new Date();
+  const manilaOffset = now.getTime() - utcNow.getTime();
+  
+  const fromTime = start.getTime() - manilaOffset;
+  const toTime = end.getTime() - manilaOffset;
 
-  const fromTime = start.getTime();
-  const toTime = end.getTime();
+  log(`⏰ Curation window (Manila): ${start.toISOString().split('T')[0]} 08:00 → ${end.toISOString().split('T')[0]} 08:00`);
+  log(`⏰ Curation window (UTC): ${new Date(fromTime).toISOString()} → ${new Date(toTime).toISOString()}`);
 
   let totalVests = 0;
+  let claimCount = 0;
 
   for (const [, op] of rawHistory) {
     const { timestamp, op: [type, data] } = op;
     const opTime = new Date(timestamp + 'Z').getTime();
-    if (type === 'curation_reward' && opTime >= fromTime && opTime < toTime) {
-      totalVests += parseFloat(data.reward);
+    // Use claim_reward_balance (actual claimed curation), not curation_reward (earned/assigned)
+    if (type === 'claim_reward_balance' && opTime >= fromTime && opTime < toTime) {
+      const claimedVests = parseFloat(data.reward_vests);
+      if (claimedVests > 0) {
+        totalVests += claimedVests;
+        claimCount++;
+        log(`  💰 Claimed: ${claimedVests.toFixed(6)} VESTS at ${timestamp}`);
+      }
     }
   }
+
+  log(`  📊 Total claims in window: ${claimCount}`);
 
   const totalHive = vestsToHP(totalVests, totalVestingFundHive, totalVestingShares);
   return totalHive;
