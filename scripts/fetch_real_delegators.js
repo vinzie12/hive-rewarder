@@ -503,7 +503,9 @@ async function main() {
     const PAYOUT_HISTORY_FILE = path.join(__dirname, '..', 'data', 'payout_history.json');
     let payoutHistory = [];
     if (fs.existsSync(PAYOUT_HISTORY_FILE)) {
-      payoutHistory = JSON.parse(fs.readFileSync(PAYOUT_HISTORY_FILE, 'utf8'));
+      const parsed = JSON.parse(fs.readFileSync(PAYOUT_HISTORY_FILE, 'utf8'));
+      // Ensure it's an array (handle corrupted or empty object files)
+      payoutHistory = Array.isArray(parsed) ? parsed : [];
       log(`💾 Loaded existing payout_history.json (${payoutHistory.length} entries)`);
     }
 
