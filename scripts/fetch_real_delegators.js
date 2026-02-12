@@ -484,11 +484,15 @@ async function main() {
     }
 
     // Fetch curation rewards per day (with multi-day gap recovery)
-    const { dailyRewards, windowEnd: curationWindowEnd } = await getCurationRewardsByDay(newOperations, totalVestingFundHive, totalVestingShares, lastCurationEnd);
+    // Use all operations (both new and existing) to ensure we catch all curation claims in the window
+    const allOperations = [...newOperations];
+    const { dailyRewards, windowEnd: curationWindowEnd } = await getCurationRewardsByDay(allOperations, totalVestingFundHive, totalVestingShares, lastCurationEnd);
     
     if (dailyRewards.length === 0) {
       log('⚠️ No curation rewards found in window.');
-      updateSyncState(db, latestIndex, curationWindowEnd);
+      // Don't update curationWindowEnd - keep trying the same window next run
+      // in case rewards appear later (e.g., delayed claim_reward_balance operations)
+      updateSyncState(db, latestIndex, lastCurationEnd);
       db.close();
       process.exit(0);
     }
