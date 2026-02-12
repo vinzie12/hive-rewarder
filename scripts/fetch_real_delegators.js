@@ -325,9 +325,9 @@ function getActiveDelegators(delegationHistory) {
   return active;
 }
 
-// ─── Fetch Claimed Curation Rewards (with multi-day gap recovery) ───
+// ─── Fetch Claimed Curation Rewards (per-day breakdown) ──────────────
 
-async function getCurationRewards(rawHistory, totalVestingFundHive, totalVestingShares, lastCurationEnd) {
+async function getCurationRewardsByDay(rawHistory, totalVestingFundHive, totalVestingShares, lastCurationEnd) {
   const phTz = 'Asia/Manila';
   
   // Get current time in Manila timezone
@@ -343,9 +343,7 @@ async function getCurationRewards(rawHistory, totalVestingFundHive, totalVesting
   
   const toTime = todayEnd.getTime() - manilaOffset;
 
-  // Determine curation window start:
-  // If lastCurationEnd > 0, resume from where we left off (covers missed days)
-  // If lastCurationEnd === 0 (first run), default to yesterday 8AM Manila
+  // Determine curation window start
   let fromTime;
   if (lastCurationEnd > 0) {
     fromTime = lastCurationEnd;
@@ -358,34 +356,50 @@ async function getCurationRewards(rawHistory, totalVestingFundHive, totalVesting
   // Safety: don't scan into the future
   if (fromTime >= toTime) {
     log(`⏰ Curation window already processed up to: ${new Date(toTime).toISOString()}`);
-    return { totalHive: 0, windowEnd: toTime };
+    return { dailyRewards: [], windowEnd: toTime };
   }
 
   const missedDays = Math.round((toTime - fromTime) / (24 * 60 * 60 * 1000));
   log(`⏰ Curation window (UTC): ${new Date(fromTime).toISOString()} → ${new Date(toTime).toISOString()}`);
   log(`⏰ Covering ${missedDays} day(s) of curation rewards${missedDays > 1 ? ' (includes missed days)' : ''}`);
 
-  let totalVests = 0;
-  let claimCount = 0;
+  // Build per-day breakdown
+  const dailyRewards = {};
 
   for (const [, op] of rawHistory) {
     const { timestamp, op: [type, data] } = op;
     const opTime = new Date(timestamp + 'Z').getTime();
-    // Use claim_reward_balance (actual claimed curation), not curation_reward (earned/assigned)
+    
+    // Use claim_reward_balance (actual claimed curation)
     if (type === 'claim_reward_balance' && opTime >= fromTime && opTime < toTime) {
       const claimedVests = parseFloat(data.reward_vests);
       if (claimedVests > 0) {
-        totalVests += claimedVests;
-        claimCount++;
-        log(`  💰 Claimed: ${claimedVests.toFixed(6)} VESTS at ${timestamp}`);
+        // Get date in Manila timezone
+        const opDate = new Date(timestamp + 'Z');
+        const manilaDate = new Date(opDate.getTime() + manilaOffset);
+        const dateStr = manilaDate.toISOString().split('T')[0];
+        
+        if (!dailyRewards[dateStr]) {
+          dailyRewards[dateStr] = { vests: 0, count: 0 };
+        }
+        dailyRewards[dateStr].vests += claimedVests;
+        dailyRewards[dateStr].count++;
+        
+        log(`  💰 Claimed: ${claimedVests.toFixed(6)} VESTS at ${timestamp} (date: ${dateStr})`);
       }
     }
   }
 
-  log(`  📊 Total claims in window: ${claimCount}`);
+  // Convert to sorted array with HIVE amounts
+  const result = Object.entries(dailyRewards)
+    .sort(([dateA], [dateB]) => dateA.localeCompare(dateB))
+    .map(([date, { vests, count }]) => {
+      const hive = vestsToHP(vests, totalVestingFundHive, totalVestingShares);
+      log(`  📊 ${date}: ${count} claims = ${hive.toFixed(6)} HIVE`);
+      return { date, vests, hive: parseFloat(hive.toFixed(6)) };
+    });
 
-  const totalHive = vestsToHP(totalVests, totalVestingFundHive, totalVestingShares);
-  return { totalHive, windowEnd: toTime };
+  return { dailyRewards: result, windowEnd: toTime };
 }
 
 // ─── Main ───────────────────────────────────────────────────────────
@@ -457,113 +471,136 @@ async function main() {
       process.exit(0);
     }
 
-    // Fetch curation rewards (with multi-day gap recovery)
-    const { totalHive: totalCurationHive, windowEnd: curationWindowEnd } = await getCurationRewards(newOperations, totalVestingFundHive, totalVestingShares, lastCurationEnd);
-    log(`📊 Total curation rewards: ${totalCurationHive.toFixed(6)} HIVE`);
-
-    // Apply 6-day eligibility cutoff (same as reference payout.js)
-    const phTz = 'Asia/Manila';
-    const now = new Date(new Date().toLocaleString('en-US', { timeZone: phTz }));
-    now.setHours(0, 0, 0, 0); // midnight Manila
-    const cutoff = now.getTime() - 6 * 24 * 60 * 60 * 1000; // 6 days ago
-
-    log(`\n⏰ Eligibility cutoff: ${new Date(cutoff).toISOString()} (6 days ago)`);
-
-    // Calculate eligible delegators (delegated at least 6 days ago)
-    const eligibleDelegators = {};
-    let eligibleTotalHP = 0;
-
-    for (const [delegator, events] of Object.entries(delegationHistory)) {
-      const sortedEvents = [...events].sort((a, b) => a.timestamp - b.timestamp);
-      let runningBalance = 0;
-      let eligibleVests = 0;
-
-      for (const event of sortedEvents) {
-        const eventTime = event.timestamp;
-        const beforeBalance = runningBalance;
-        runningBalance += event.vests;
-
-        const isEventEligible = eventTime <= cutoff;
-
-        if (isEventEligible) {
-          eligibleVests = Math.max(0, runningBalance);
-        }
-      }
-
-      const currentDelegation = Math.max(0, runningBalance);
-      eligibleVests = Math.min(eligibleVests, currentDelegation);
-
-      if (eligibleVests > 0) {
-        const eligibleHP = vestsToHP(eligibleVests, totalVestingFundHive, totalVestingShares);
-        eligibleDelegators[delegator] = eligibleHP;
-        eligibleTotalHP += eligibleHP;
-      }
-    }
-
-    log(`👥 Eligible delegators (6+ days): ${Object.keys(eligibleDelegators).length}`);
-    log(`📈 Total eligible delegation (HP): ${eligibleTotalHP.toFixed(3)} HP`);
-
-    if (eligibleTotalHP === 0) {
-      log('⚠️ No eligible delegations found.');
+    // Fetch curation rewards per day (with multi-day gap recovery)
+    const { dailyRewards, windowEnd: curationWindowEnd } = await getCurationRewardsByDay(newOperations, totalVestingFundHive, totalVestingShares, lastCurationEnd);
+    
+    if (dailyRewards.length === 0) {
+      log('⚠️ No curation rewards found in window.');
       updateSyncState(db, latestIndex, curationWindowEnd);
       db.close();
       process.exit(0);
     }
 
-    // Distribute 95% of curation rewards proportionally to eligible delegators
-    const distributable = totalCurationHive * 0.95;
+    log(`\n📅 Processing ${dailyRewards.length} day(s) of payouts...`);
 
-    // Build delegator list with base rewards
-    const delegatorData = [];
-
-    log('\n📋 Eligible Delegator Rewards:');
-    log('─'.repeat(60));
-
-    // Sort by HP descending
-    const sortedDelegators = Object.entries(eligibleDelegators).sort((a, b) => b[1] - a[1]);
-
-    for (const [delegator, hp] of sortedDelegators) {
-      const share = hp / eligibleTotalHP;
-      const baseReward = parseFloat((distributable * share).toFixed(6));
-
-      delegatorData.push({
-        name: delegator,
-        hp: parseFloat(hp.toFixed(3)),
-        base_reward: baseReward
-      });
-
-      const percent = (share * 100).toFixed(2);
-      log(`  (${percent}%) @${delegator}: ${hp.toFixed(3)} HP → reward: ${baseReward} HIVE`);
+    // Load or initialize payout history
+    const PAYOUT_HISTORY_FILE = path.join(__dirname, '..', 'data', 'payout_history.json');
+    let payoutHistory = [];
+    if (fs.existsSync(PAYOUT_HISTORY_FILE)) {
+      payoutHistory = JSON.parse(fs.readFileSync(PAYOUT_HISTORY_FILE, 'utf8'));
+      log(`💾 Loaded existing payout_history.json (${payoutHistory.length} entries)`);
     }
 
-    log('─'.repeat(60));
+    // Generate payout for each day
+    const phTz = 'Asia/Manila';
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: phTz }));
+    now.setHours(0, 0, 0, 0); // midnight Manila
+    const cutoff = now.getTime() - 6 * 24 * 60 * 60 * 1000; // 6 days ago
 
-    // Create payout summary
-    const payoutSummary = {
-      date: getTodayUTC(),
-      total_delegation_hp: parseFloat(eligibleTotalHP.toFixed(3)),
-      total_curation_hive: parseFloat(totalCurationHive.toFixed(6)),
-      distributable_hive: parseFloat(distributable.toFixed(6)),
-      delegators: delegatorData
-    };
+    let todayPayoutSummary = null;
 
-    // Save payout_summary.json
-    saveJSON('payout_summary.json', payoutSummary);
+    for (const { date, hive: totalCurationHive } of dailyRewards) {
+      log(`\n${'═'.repeat(60)}`);
+      log(`📅 PAYOUT FOR: ${date}`);
+      log(`${'═'.repeat(60)}`);
 
-    log(`\n📊 Summary:`);
-    log(`   Total active delegation: ${Object.values(activeDelegators).reduce((a, b) => a + b, 0).toFixed(3)} HP`);
-    log(`   Eligible delegation (6+ days): ${eligibleTotalHP.toFixed(3)} HP`);
-    log(`   Active delegators: ${activeCount}`);
-    log(`   Eligible delegators: ${Object.keys(eligibleDelegators).length}`);
-    log(`   Total curation: ${totalCurationHive.toFixed(6)} HIVE`);
-    log(`   Distributable (95%): ${distributable.toFixed(6)} HIVE`);
-    log(`   Retained (5%): ${(totalCurationHive * 0.05).toFixed(6)} HIVE`);
+      // Calculate eligible delegators for this date
+      const eligibleDelegators = {};
+      let eligibleTotalHP = 0;
+
+      for (const [delegator, events] of Object.entries(delegationHistory)) {
+        const sortedEvents = [...events].sort((a, b) => a.timestamp - b.timestamp);
+        let runningBalance = 0;
+        let eligibleVests = 0;
+
+        for (const event of sortedEvents) {
+          const eventTime = event.timestamp;
+          runningBalance += event.vests;
+
+          const isEventEligible = eventTime <= cutoff;
+
+          if (isEventEligible) {
+            eligibleVests = Math.max(0, runningBalance);
+          }
+        }
+
+        const currentDelegation = Math.max(0, runningBalance);
+        eligibleVests = Math.min(eligibleVests, currentDelegation);
+
+        if (eligibleVests > 0) {
+          const eligibleHP = vestsToHP(eligibleVests, totalVestingFundHive, totalVestingShares);
+          eligibleDelegators[delegator] = eligibleHP;
+          eligibleTotalHP += eligibleHP;
+        }
+      }
+
+      if (eligibleTotalHP === 0) {
+        log(`⚠️ No eligible delegations for ${date}`);
+        continue;
+      }
+
+      // Distribute 95% of curation rewards
+      const distributable = totalCurationHive * 0.95;
+      const delegatorData = [];
+
+      log(`\n👥 Eligible delegators: ${Object.keys(eligibleDelegators).length}`);
+      log(`📈 Total eligible delegation: ${eligibleTotalHP.toFixed(3)} HP`);
+      log(`💰 Curation rewards: ${totalCurationHive.toFixed(6)} HIVE`);
+      log(`\n📋 Delegator Rewards:`);
+      log('─'.repeat(60));
+
+      const sortedDelegators = Object.entries(eligibleDelegators).sort((a, b) => b[1] - a[1]);
+
+      for (const [delegator, hp] of sortedDelegators) {
+        const share = hp / eligibleTotalHP;
+        const baseReward = parseFloat((distributable * share).toFixed(6));
+
+        delegatorData.push({
+          name: delegator,
+          hp: parseFloat(hp.toFixed(3)),
+          base_reward: baseReward
+        });
+
+        const percent = (share * 100).toFixed(2);
+        log(`  (${percent}%) @${delegator}: ${hp.toFixed(3)} HP → ${baseReward} HIVE`);
+      }
+
+      log('─'.repeat(60));
+
+      // Create payout entry for this day
+      const payoutEntry = {
+        date,
+        total_delegation_hp: parseFloat(eligibleTotalHP.toFixed(3)),
+        total_curation_hive: parseFloat(totalCurationHive.toFixed(6)),
+        distributable_hive: parseFloat(distributable.toFixed(6)),
+        delegators: delegatorData
+      };
+
+      payoutHistory.push(payoutEntry);
+
+      // If this is today's date, also save as payout_summary.json for accumulator.js
+      if (date === getTodayUTC()) {
+        todayPayoutSummary = payoutEntry;
+      }
+    }
+
+    // Save payout history
+    fs.writeFileSync(PAYOUT_HISTORY_FILE, JSON.stringify(payoutHistory, null, 2));
+    log(`\n💾 Saved payout_history.json (${payoutHistory.length} total entries)`);
+
+    // Save today's payout as payout_summary.json (for accumulator.js)
+    if (todayPayoutSummary) {
+      saveJSON('payout_summary.json', todayPayoutSummary);
+      log(`💾 Saved payout_summary.json (today's payout)`);
+    } else {
+      log(`⚠️ No payout for today in the processed window`);
+    }
 
     // ── Crash-safe: update sync state ONLY after full success ──
     updateSyncState(db, latestIndex, curationWindowEnd);
     db.close();
 
-    log(`\n✅ payout_summary.json and delegation_history.json updated!`);
+    log(`\n✅ Daily payouts processed and saved!`);
 
   } catch (error) {
     log(`❌ Error: ${error.message}`);
