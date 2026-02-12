@@ -4,12 +4,17 @@
  * No live backend required; reads JSON directly.
  */
 
-// Base path for data files (adjust for GitHub Pages deployment)
-const DATA_BASE = '../data';
+// Base path for data files (GitHub Pages deployment)
+// Works both locally (../data) and on GitHub Pages (/hive-rewarder/data)
+const DATA_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? '../data'
+  : '/hive-rewarder/data';
 
 async function loadJSON(filename) {
   try {
-    const res = await fetch(`${DATA_BASE}/${filename}`);
+    const url = `${DATA_BASE}/${filename}`;
+    console.log(`Loading: ${url}`);
+    const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
   } catch (err) {
