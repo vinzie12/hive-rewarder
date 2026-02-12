@@ -21,8 +21,6 @@ data/sync.db
 data/sync.db-wal
 data/sync.db-shm
 
-# Generated payout history
-data/payout_history.json
 
 # Build
 dist/
