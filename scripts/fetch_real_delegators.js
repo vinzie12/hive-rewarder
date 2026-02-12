@@ -363,7 +363,20 @@ async function getCurationRewardsByDay(rawHistory, totalVestingFundHive, totalVe
   log(`⏰ Curation window (UTC): ${new Date(fromTime).toISOString()} → ${new Date(toTime).toISOString()}`);
   log(`⏰ Covering ${missedDays} day(s) of curation rewards${missedDays > 1 ? ' (includes missed days)' : ''}`);
 
-  // Build per-day breakdown
+  // Build 8AM→8AM Manila window boundaries for each day in range
+  const ONE_DAY = 24 * 60 * 60 * 1000;
+  const windows = [];
+  let winStart = fromTime;
+  while (winStart < toTime) {
+    const winEnd = Math.min(winStart + ONE_DAY, toTime);
+    // Window date label = the Manila date of the window start (8AM Manila)
+    const manilaStart = new Date(winStart + manilaOffset);
+    const dateStr = manilaStart.toISOString().split('T')[0];
+    windows.push({ dateStr, start: winStart, end: winEnd });
+    winStart = winEnd;
+  }
+
+  // Build per-day breakdown using window boundaries
   const dailyRewards = {};
 
   for (const [, op] of rawHistory) {
@@ -374,10 +387,9 @@ async function getCurationRewardsByDay(rawHistory, totalVestingFundHive, totalVe
     if (type === 'claim_reward_balance' && opTime >= fromTime && opTime < toTime) {
       const claimedVests = parseFloat(data.reward_vests);
       if (claimedVests > 0) {
-        // Get date in Manila timezone
-        const opDate = new Date(timestamp + 'Z');
-        const manilaDate = new Date(opDate.getTime() + manilaOffset);
-        const dateStr = manilaDate.toISOString().split('T')[0];
+        // Find which 8AM→8AM window this claim belongs to
+        const win = windows.find(w => opTime >= w.start && opTime < w.end);
+        const dateStr = win ? win.dateStr : 'unknown';
         
         if (!dailyRewards[dateStr]) {
           dailyRewards[dateStr] = { vests: 0, count: 0 };
@@ -385,7 +397,7 @@ async function getCurationRewardsByDay(rawHistory, totalVestingFundHive, totalVe
         dailyRewards[dateStr].vests += claimedVests;
         dailyRewards[dateStr].count++;
         
-        log(`  💰 Claimed: ${claimedVests.toFixed(6)} VESTS at ${timestamp} (date: ${dateStr})`);
+        log(`  💰 Claimed: ${claimedVests.toFixed(6)} VESTS at ${timestamp} (window: ${dateStr})`);
       }
     }
   }
