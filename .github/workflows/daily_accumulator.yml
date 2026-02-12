@@ -24,8 +24,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Fetch rewards
-        run: node scripts/fetch_rewards.js
+      - name: Fetch real delegators
+        run: node scripts/fetch_real_delegators.js
 
       - name: Run accumulator
         run: node scripts/accumulator.js
