@@ -1,8 +1,8 @@
 {
   "date": "2026-02-12",
-  "total_delegation_hp": 7294.825,
+  "total_delegation_hp": 7294.826,
   "total_curation_hive": 1.63167,
-  "distributable_hive": 1.550086,
+  "distributable_hive": 1.550087,
   "delegators": [
     {
       "name": "gretelarmfeg",
@@ -11,12 +11,12 @@
     },
     {
       "name": "suteru",
-      "hp": 1007.357,
+      "hp": 1007.358,
       "base_reward": 0.214055
     },
     {
       "name": "diosarich",
-      "hp": 955.337,
+      "hp": 955.338,
       "base_reward": 0.203001
     },
     {
@@ -82,7 +82,7 @@
     {
       "name": "wanderelle",
       "hp": 101.578,
-      "base_reward": 0.021584
+      "base_reward": 0.021585
     },
     {
       "name": "crstypatata",
