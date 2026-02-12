@@ -596,22 +596,20 @@ async function main() {
 
       payoutHistory.push(payoutEntry);
 
-      // If this is today's date, also save as payout_summary.json for accumulator.js
-      if (date === getTodayUTC()) {
-        todayPayoutSummary = payoutEntry;
-      }
+      // Always track the latest payout entry for payout_summary.json
+      todayPayoutSummary = payoutEntry;
     }
 
     // Save payout history
     fs.writeFileSync(PAYOUT_HISTORY_FILE, JSON.stringify(payoutHistory, null, 2));
     log(`\n💾 Saved payout_history.json (${payoutHistory.length} total entries)`);
 
-    // Save today's payout as payout_summary.json (for accumulator.js)
+    // Save latest payout as payout_summary.json (for accumulator.js)
     if (todayPayoutSummary) {
       saveJSON('payout_summary.json', todayPayoutSummary);
-      log(`💾 Saved payout_summary.json (today's payout)`);
+      log(`💾 Saved payout_summary.json for date: ${todayPayoutSummary.date}`);
     } else {
-      log(`⚠️ No payout for today in the processed window`);
+      log(`⚠️ No payouts were processed`);
     }
 
     // ── Crash-safe: update sync state ONLY after full success ──
