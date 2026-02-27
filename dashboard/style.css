@@ -52,6 +52,30 @@ body {
   position: relative;
 }
 
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border: 1px solid var(--border-light);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary);
+  margin-left: 0.5rem;
+}
+
+.badge--excluded {
+  border-color: rgba(237, 137, 54, 0.35);
+  background: var(--orange-glow);
+  color: var(--orange);
+}
+
+tr.row-excluded {
+  opacity: 0.75;
+}
+
 /* ─── Animated Background Glows ─── */
 .bg-glow {
   position: fixed;
@@ -706,6 +730,149 @@ td.purple { color: var(--purple); }
 
 .footer a:hover {
   text-decoration: underline;
+}
+
+/* ─── Chart Toolbar (Scales to Many Dates) ─── */
+.chart-toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.chart-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.chart-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 220px;
+}
+
+.chart-control--compact {
+  min-width: 120px;
+}
+
+.chart-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.chart-select,
+.chart-input {
+  background: rgba(17, 22, 32, 0.7);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+  outline: none;
+  box-shadow: 0 0 0 0 rgba(66, 153, 225, 0);
+  transition: all 0.2s ease;
+}
+
+.chart-select:focus,
+.chart-input:focus {
+  border-color: rgba(66, 153, 225, 0.7);
+  box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.12);
+}
+
+.chart-meta {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 45%;
+}
+
+@media (max-width: 900px) {
+  .chart-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .chart-control {
+    min-width: 0;
+    flex: 1;
+  }
+  .chart-meta {
+    max-width: 100%;
+  }
+}
+
+/* ─── Horizontal Bar Chart ─── */
+.hbar-list {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.25rem;
+}
+
+.hbar-row {
+  display: grid;
+  grid-template-columns: 42px 200px 1fr 120px;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(17, 22, 32, 0.75), rgba(12, 16, 24, 0.55));
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+}
+
+.hbar-rank {
+  color: var(--text-muted);
+  font-weight: 700;
+  text-align: right;
+}
+
+.hbar-name {
+  min-width: 0;
+}
+
+.hbar-sub {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  margin-top: 0.1rem;
+}
+
+.hbar-track {
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.hbar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(56, 178, 172, 0.85), rgba(66, 153, 225, 0.9), rgba(159, 122, 234, 0.9));
+  box-shadow: 0 0 24px rgba(66, 153, 225, 0.15);
+}
+
+.hbar-val {
+  text-align: right;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .hbar-row {
+    grid-template-columns: 42px 1fr;
+    grid-template-areas:
+      "rank name"
+      "bar bar"
+      "val val";
+  }
+  .hbar-rank { grid-area: rank; }
+  .hbar-name { grid-area: name; }
+  .hbar-track { grid-area: bar; }
+  .hbar-val { grid-area: val; text-align: left; }
 }
 
 /* ─── Loading ─── */

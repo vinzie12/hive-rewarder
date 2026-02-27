@@ -152,8 +152,27 @@
               Reward Distribution
             </h2>
           </div>
-          <div class="chart-selector">
-            <div class="chart-dates" id="chart-dates"></div>
+          <div class="chart-toolbar">
+            <div class="chart-controls">
+              <div class="chart-control">
+                <label class="chart-label" for="chart-date-select">Date</label>
+                <select id="chart-date-select" class="chart-select"></select>
+              </div>
+              <div class="chart-control">
+                <label class="chart-label" for="chart-filter">Filter</label>
+                <input id="chart-filter" class="chart-input" type="text" placeholder="Search delegator..." />
+              </div>
+              <div class="chart-control chart-control--compact">
+                <label class="chart-label" for="chart-top">Top</label>
+                <select id="chart-top" class="chart-select">
+                  <option value="10">10</option>
+                  <option value="20" selected>20</option>
+                  <option value="50">50</option>
+                  <option value="all">All</option>
+                </select>
+              </div>
+            </div>
+            <div class="chart-meta" id="chart-meta"></div>
           </div>
           <div class="chart-container">
             <div class="bar-chart" id="bar-chart"></div>

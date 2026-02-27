@@ -42,11 +42,12 @@ async function loadDashboard() {
   const statusBadge = document.getElementById('header-status');
 
   try {
-    const [payoutSummary, balances, sbiLog, payoutHistory] = await Promise.all([
+    const [payoutSummary, balances, sbiLog, payoutHistory, config] = await Promise.all([
       loadJSON('payout_summary.json'),
       loadJSON('delegator_balances.json'),
       loadJSON('sbi_log.json'),
-      loadJSON('payout_history.json')
+      loadJSON('payout_history.json'),
+      loadJSON('config.json')
     ]);
 
     if (!payoutSummary || !balances) {
@@ -71,6 +72,11 @@ async function loadDashboard() {
     const multiplier = getMultiplier(payoutSummary.total_delegation_hp);
     const totalHP = payoutSummary.total_delegation_hp;
     const curationHive = payoutSummary.total_curation_hive || 0;
+
+    const excludedFromSbi = new Set(
+      (config && Array.isArray(config.excluded_from_sbi) ? config.excluded_from_sbi : [])
+        .map(n => String(n).toLowerCase())
+    );
 
     // Stat cards
     document.getElementById('stat-date').textContent = formatDate(payoutSummary.date);
@@ -98,14 +104,18 @@ async function loadDashboard() {
       const share = totalHP > 0 ? ((d.hp / totalHP) * 100) : 0;
       const initial = d.name.charAt(0).toUpperCase();
 
+      const isExcluded = excludedFromSbi.has(d.name.toLowerCase());
+
       const tr = document.createElement('tr');
       tr.dataset.name = d.name.toLowerCase();
+      if (isExcluded) tr.classList.add('row-excluded');
       tr.innerHTML = `
         <td><span class="rank ${isRanked ? getRankClass(rank) : 'rank--default'}">${isRanked ? rank : '—'}</span></td>
         <td>
           <div class="delegator-name">
             <div class="delegator-avatar">${initial}</div>
             <a href="https://peakd.com/@${d.name}" target="_blank" class="delegator-link">@${d.name}</a>
+            ${isExcluded ? '<span class="badge badge--excluded">Excluded from SBI</span>' : ''}
           </div>
         </td>
         <td class="mono">${d.hp.toLocaleString()} HP</td>
@@ -186,27 +196,51 @@ async function loadDashboard() {
       chartByDate[payoutSummary.date] = payoutSummary.delegators;
     }
 
-    // Render chart date selector
-    const chartDatesContainer = document.getElementById('chart-dates');
-    const dates = Object.keys(chartByDate).sort().reverse();
-    let selectedDate = dates[0] || payoutSummary.date;
+    // Chart toolbar
+    const dateSelect = document.getElementById('chart-date-select');
+    const filterInput = document.getElementById('chart-filter');
+    const topSelect = document.getElementById('chart-top');
+    const chartMeta = document.getElementById('chart-meta');
 
+    const dates = Object.keys(chartByDate).sort().reverse();
+    const initialDate = dates[0] || payoutSummary.date;
+
+    dateSelect.innerHTML = '';
     for (const date of dates) {
-      const btn = document.createElement('button');
-      btn.className = `chart-date-btn ${date === selectedDate ? 'chart-date-btn--active' : ''}`;
-      btn.textContent = formatDate(date);
-      btn.dataset.date = date;
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.chart-date-btn').forEach(b => b.classList.remove('chart-date-btn--active'));
-        btn.classList.add('chart-date-btn--active');
-        selectedDate = date;
-        renderChartForDate(chartByDate[date] || []);
-      });
-      chartDatesContainer.appendChild(btn);
+      const opt = document.createElement('option');
+      opt.value = date;
+      opt.textContent = formatDate(date);
+      if (date === initialDate) opt.selected = true;
+      dateSelect.appendChild(opt);
     }
 
+    function updateChart() {
+      const date = dateSelect.value || initialDate;
+      const q = (filterInput.value || '').toLowerCase().trim();
+      const topVal = topSelect.value;
+
+      const raw = chartByDate[date] || [];
+      const filtered = q
+        ? raw.filter(d => (d.name || '').toLowerCase().includes(q))
+        : raw;
+
+      const sorted = [...filtered].sort((a, b) => (b.base_reward || 0) - (a.base_reward || 0));
+      const limited = topVal === 'all' ? sorted : sorted.slice(0, Number(topVal) || 20);
+
+      const total = raw.length;
+      const showing = limited.length;
+      const sum = raw.reduce((acc, d) => acc + (d.base_reward || 0), 0);
+      chartMeta.textContent = `${formatDate(date)} • ${showing}/${total} delegators • ${sum.toFixed(3)} HIVE distributable`;
+
+      renderChartForDate(limited);
+    }
+
+    dateSelect.addEventListener('change', updateChart);
+    topSelect.addEventListener('change', updateChart);
+    filterInput.addEventListener('input', updateChart);
+
     // Render initial chart
-    renderChartForDate(chartByDate[selectedDate] || []);
+    updateChart();
 
     // SBI Log
     const sbiTbody = document.getElementById('sbi-tbody');
@@ -273,26 +307,33 @@ function renderChartForDate(delegators) {
 
   // Sort by reward descending
   const sorted = [...delegators].sort((a, b) => (b.base_reward || 0) - (a.base_reward || 0));
-
   const maxVal = Math.max(...sorted.map(d => d.base_reward || 0), 0.001);
 
-  for (const d of sorted) {
+  const list = document.createElement('div');
+  list.className = 'hbar-list';
+
+  for (let i = 0; i < sorted.length; i++) {
+    const d = sorted[i];
     const reward = d.base_reward || 0;
-    const heightPercent = Math.max((reward / maxVal) * 100, 2);
-
-    const group = document.createElement('div');
-    group.className = 'bar-group';
-
-    group.innerHTML = `
-      <div class="bar-value">${reward > 0 ? reward.toFixed(2) : '0'}</div>
-      <div class="bar" style="height: ${heightPercent}%">
-        <div class="bar-tooltip">@${d.name}<br>HP: ${d.hp.toLocaleString()}<br>Reward: ${reward.toFixed(3)} HIVE</div>
+    const widthPercent = Math.max((reward / maxVal) * 100, 1.5);
+    const row = document.createElement('div');
+    row.className = 'hbar-row';
+    row.innerHTML = `
+      <div class="hbar-rank mono">${i + 1}</div>
+      <div class="hbar-name">
+        <a href="https://peakd.com/@${d.name}" target="_blank" class="delegator-link">@${d.name}</a>
+        <div class="hbar-sub mono">${(d.hp || 0).toLocaleString()} HP</div>
       </div>
-      <div class="bar-label">@${d.name}</div>
+      <div class="hbar-track">
+        <div class="hbar-fill" style="width: ${widthPercent}%"></div>
+      </div>
+      <div class="hbar-val mono">${reward.toFixed(3)} HIVE</div>
     `;
-
-    container.appendChild(group);
+    row.title = `@${d.name}\nHP: ${(d.hp || 0).toLocaleString()}\nReward: ${reward.toFixed(3)} HIVE`;
+    list.appendChild(row);
   }
+
+  container.appendChild(list);
 }
 
 // Initialize

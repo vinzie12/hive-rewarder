@@ -33,6 +33,7 @@ jobs:
           DRY_RUN: ${{ secrets.DRY_RUN }}
           HIVE_USER: ${{ secrets.HIVE_USER }}
           HIVE_KEY: ${{ secrets.HIVE_KEY }}
+          SBI_EXCLUDE: ${{ secrets.SBI_EXCLUDE }}
 
       - name: Commit updated JSON files
         run: |
