@@ -733,7 +733,6 @@ td.purple { color: var(--purple); }
 }
 
 /* ─── Chart Toolbar (Scales to Many Dates) ─── */
-.chart-toolbar {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -803,6 +802,12 @@ td.purple { color: var(--purple); }
   .chart-meta {
     max-width: 100%;
   }
+}
+
+/* ─── Chart Container (Scrollable for Many Rows) ─── */
+.chart-container {
+  max-height: 600px;
+  overflow-y: auto;
 }
 
 /* ─── Horizontal Bar Chart ─── */
