@@ -275,24 +275,6 @@ async function loadDashboard() {
       sbiTbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-secondary); padding: 2rem;">No SBI transactions yet.</td></tr>';
     }
 
-    // Tab switching logic
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabPanels = document.querySelectorAll('.tab-panel');
-
-    tabBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const tabName = btn.dataset.tab;
-
-        // Remove active from all buttons and panels
-        tabBtns.forEach(b => b.classList.remove('tab-btn--active'));
-        tabPanels.forEach(p => p.classList.remove('tab-panel--active'));
-
-        // Add active to clicked button and corresponding panel
-        btn.classList.add('tab-btn--active');
-        document.querySelector(`[data-panel="${tabName}"]`).classList.add('tab-panel--active');
-      });
-    });
-
   } catch (err) {
     console.error('Dashboard error:', err);
     loadingEl.innerHTML = `
@@ -344,5 +326,25 @@ function renderChartForDate(delegators) {
   container.appendChild(list);
 }
 
-// Initialize
+// Initialize dashboard
+// Tab switching logic (always runs, even if dashboard loading fails)
+document.addEventListener('DOMContentLoaded', () => {
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const tabPanels = document.querySelectorAll('.tab-panel');
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tabName = btn.dataset.tab;
+
+      // Remove active from all buttons and panels
+      tabBtns.forEach(b => b.classList.remove('tab-btn--active'));
+      tabPanels.forEach(p => p.classList.remove('tab-panel--active'));
+
+      // Add active to clicked button and corresponding panel
+      btn.classList.add('tab-btn--active');
+      document.querySelector(`[data-panel="${tabName}"]`).classList.add('tab-panel--active');
+    });
+  });
+});
+
 document.addEventListener('DOMContentLoaded', loadDashboard);
