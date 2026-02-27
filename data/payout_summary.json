@@ -1,112 +1,112 @@
 {
   "date": "2026-02-26",
-  "total_delegation_hp": 7263.04,
-  "total_curation_hive": 1.283516,
-  "distributable_hive": 1.21934,
+  "total_delegation_hp": 7263.147,
+  "total_curation_hive": 1.283535,
+  "distributable_hive": 1.219358,
   "delegators": [
     {
       "name": "gretelarmfeg",
-      "hp": 1108.15,
-      "base_reward": 0.186039
+      "hp": 1108.167,
+      "base_reward": 0.186042
     },
     {
       "name": "suteru",
-      "hp": 1008.484,
-      "base_reward": 0.169307
+      "hp": 1008.498,
+      "base_reward": 0.16931
     },
     {
       "name": "diosarich",
-      "hp": 956.405,
-      "base_reward": 0.160564
+      "hp": 956.42,
+      "base_reward": 0.160566
     },
     {
       "name": "vinzie1",
-      "hp": 808.619,
-      "base_reward": 0.135753
+      "hp": 808.631,
+      "base_reward": 0.135755
     },
     {
       "name": "katiekate86",
-      "hp": 505.121,
-      "base_reward": 0.084801
+      "hp": 505.129,
+      "base_reward": 0.084802
     },
     {
       "name": "jeanieviv84",
-      "hp": 406.512,
-      "base_reward": 0.068246
+      "hp": 406.518,
+      "base_reward": 0.068247
     },
     {
       "name": "dreamrona",
-      "hp": 302.895,
-      "base_reward": 0.050851
+      "hp": 302.899,
+      "base_reward": 0.050852
     },
     {
       "name": "vvodjiu",
-      "hp": 252.249,
-      "base_reward": 0.042348
+      "hp": 252.253,
+      "base_reward": 0.042349
     },
     {
       "name": "blueoctopus",
-      "hp": 201.225,
-      "base_reward": 0.033782
+      "hp": 201.228,
+      "base_reward": 0.033783
     },
     {
       "name": "hopefulsoul",
-      "hp": 192.849,
-      "base_reward": 0.032376
+      "hp": 192.852,
+      "base_reward": 0.032377
     },
     {
       "name": "ronimarie82",
-      "hp": 152.065,
-      "base_reward": 0.025529
+      "hp": 152.067,
+      "base_reward": 0.02553
     },
     {
       "name": "lj1728",
-      "hp": 151.037,
+      "hp": 151.04,
       "base_reward": 0.025357
     },
     {
       "name": "antonette",
-      "hp": 101.8,
-      "base_reward": 0.01709
+      "hp": 101.801,
+      "base_reward": 0.017091
     },
     {
       "name": "krissymayol",
-      "hp": 101.757,
-      "base_reward": 0.017083
+      "hp": 101.759,
+      "base_reward": 0.017084
     },
     {
       "name": "wanderelle",
-      "hp": 101.692,
-      "base_reward": 0.017072
+      "hp": 101.693,
+      "base_reward": 0.017073
     },
     {
       "name": "crstypatata",
-      "hp": 100.559,
+      "hp": 100.561,
       "base_reward": 0.016882
     },
     {
       "name": "mayt",
-      "hp": 100.528,
+      "hp": 100.53,
       "base_reward": 0.016877
     },
     {
       "name": "lolitaanana001",
-      "hp": 100.176,
+      "hp": 100.178,
       "base_reward": 0.016818
     },
     {
       "name": "jocabanero4",
-      "hp": 100.006,
-      "base_reward": 0.016789
+      "hp": 100.008,
+      "base_reward": 0.01679
     },
     {
       "name": "izyllah-aeon",
-      "hp": 93.972,
-      "base_reward": 0.015776
+      "hp": 93.973,
+      "base_reward": 0.015777
     },
     {
       "name": "saijan19",
-      "hp": 50.846,
+      "hp": 50.847,
       "base_reward": 0.008536
     },
     {
@@ -121,8 +121,8 @@
     },
     {
       "name": "rabino7515",
-      "hp": 50.395,
-      "base_reward": 0.00846
+      "hp": 50.396,
+      "base_reward": 0.008461
     },
     {
       "name": "desyah07",
@@ -131,13 +131,13 @@
     },
     {
       "name": "gracefulwrites",
-      "hp": 30.549,
+      "hp": 30.55,
       "base_reward": 0.005129
     },
     {
       "name": "rizz26",
-      "hp": 30.488,
-      "base_reward": 0.005118
+      "hp": 30.489,
+      "base_reward": 0.005119
     },
     {
       "name": "daileen23",
@@ -146,7 +146,7 @@
     },
     {
       "name": "arriane001",
-      "hp": 25.197,
+      "hp": 25.198,
       "base_reward": 0.00423
     },
     {
@@ -161,7 +161,7 @@
     },
     {
       "name": "yhanyx87",
-      "hp": 14.24,
+      "hp": 14.241,
       "base_reward": 0.002391
     },
     {
