@@ -1,0 +1,6 @@
+{
+  "excluded_from_sbi": [
+    "example-user1",
+    "example-user2"
+  ]
+}

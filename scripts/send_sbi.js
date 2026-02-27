@@ -17,6 +17,16 @@ const ACTIVE_KEY = process.env.HIVE_KEY || '';
 const SBI_ACCOUNT = 'steembasicincome';
 const SBI_CHUNK = 1.0;
 
+function getExcludedDelegators() {
+  const cfg = loadJSON('config.json', {});
+  const fromFile = Array.isArray(cfg.excluded_from_sbi) ? cfg.excluded_from_sbi : [];
+  const fromEnv = (process.env.SBI_EXCLUDE || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+  return new Set([...fromFile, ...fromEnv].map(s => s.toLowerCase()));
+}
+
 const HIVE_NODES = [
   'https://api.hive.blog',
   'https://api.openhive.network',
@@ -100,9 +110,20 @@ async function processSBIPayouts() {
   const sbiLog = loadJSON('sbi_log.json', []);
   const today = getTodayUTC();
 
+  const excluded = getExcludedDelegators();
+
   let totalSent = 0;
 
   for (const [delegator, data] of Object.entries(balances)) {
+    if (delegator === '_meta') continue;
+
+    if (excluded.has(delegator.toLowerCase())) {
+      if (data && typeof data.balance === 'number' && data.balance >= SBI_CHUNK) {
+        log(`⛔ Excluded from SBI: @${delegator} (balance: ${data.balance})`);
+      }
+      continue;
+    }
+
     while (data.balance >= SBI_CHUNK) {
       const success = await sendSBI(delegator);
 
