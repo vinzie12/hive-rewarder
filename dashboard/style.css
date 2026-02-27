@@ -733,6 +733,7 @@ td.purple { color: var(--purple); }
 }
 
 /* ─── Chart Toolbar (Scales to Many Dates) ─── */
+.chart-toolbar {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -869,15 +870,11 @@ td.purple { color: var(--purple); }
 @media (max-width: 900px) {
   .hbar-row {
     grid-template-columns: 42px 1fr;
-    grid-template-areas:
-      "rank name"
-      "bar bar"
-      "val val";
+    grid-template-rows: auto auto auto;
+    row-gap: 0.35rem;
   }
-  .hbar-rank { grid-area: rank; }
-  .hbar-name { grid-area: name; }
-  .hbar-track { grid-area: bar; }
-  .hbar-val { grid-area: val; text-align: left; }
+  .hbar-track { grid-column: 1 / -1; }
+  .hbar-val { grid-column: 1 / -1; text-align: left; }
 }
 
 /* ─── Loading ─── */
