@@ -196,51 +196,59 @@ async function loadDashboard() {
       chartByDate[payoutSummary.date] = payoutSummary.delegators;
     }
 
-    // Chart toolbar
+    // Chart toolbar (defensive: do not crash dashboard if chart UI mismatches)
     const dateSelect = document.getElementById('chart-date-select');
     const filterInput = document.getElementById('chart-filter');
     const topSelect = document.getElementById('chart-top');
     const chartMeta = document.getElementById('chart-meta');
+    const chartContainer = document.getElementById('bar-chart');
 
     const dates = Object.keys(chartByDate).sort().reverse();
     const initialDate = dates[0] || payoutSummary.date;
 
-    dateSelect.innerHTML = '';
-    for (const date of dates) {
-      const opt = document.createElement('option');
-      opt.value = date;
-      opt.textContent = formatDate(date);
-      if (date === initialDate) opt.selected = true;
-      dateSelect.appendChild(opt);
+    const canRenderChart = Boolean(dateSelect && filterInput && topSelect && chartMeta && chartContainer);
+    if (!canRenderChart) {
+      if (chartContainer) {
+        chartContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 2rem;">Chart UI is updating. Please refresh in a few seconds.</p>';
+      }
+    } else {
+      dateSelect.innerHTML = '';
+      for (const date of dates) {
+        const opt = document.createElement('option');
+        opt.value = date;
+        opt.textContent = formatDate(date);
+        if (date === initialDate) opt.selected = true;
+        dateSelect.appendChild(opt);
+      }
+
+      function updateChart() {
+        const date = dateSelect.value || initialDate;
+        const q = (filterInput.value || '').toLowerCase().trim();
+        const topVal = topSelect.value;
+
+        const raw = chartByDate[date] || [];
+        const filtered = q
+          ? raw.filter(d => (d.name || '').toLowerCase().includes(q))
+          : raw;
+
+        const sorted = [...filtered].sort((a, b) => (b.base_reward || 0) - (a.base_reward || 0));
+        const limited = topVal === 'all' ? sorted : sorted.slice(0, Number(topVal) || 20);
+
+        const total = raw.length;
+        const showing = limited.length;
+        const sum = raw.reduce((acc, d) => acc + (d.base_reward || 0), 0);
+        chartMeta.textContent = `${formatDate(date)} • ${showing}/${total} delegators • ${sum.toFixed(3)} HIVE distributable`;
+
+        renderChartForDate(limited);
+      }
+
+      dateSelect.addEventListener('change', updateChart);
+      topSelect.addEventListener('change', updateChart);
+      filterInput.addEventListener('input', updateChart);
+
+      // Render initial chart
+      updateChart();
     }
-
-    function updateChart() {
-      const date = dateSelect.value || initialDate;
-      const q = (filterInput.value || '').toLowerCase().trim();
-      const topVal = topSelect.value;
-
-      const raw = chartByDate[date] || [];
-      const filtered = q
-        ? raw.filter(d => (d.name || '').toLowerCase().includes(q))
-        : raw;
-
-      const sorted = [...filtered].sort((a, b) => (b.base_reward || 0) - (a.base_reward || 0));
-      const limited = topVal === 'all' ? sorted : sorted.slice(0, Number(topVal) || 20);
-
-      const total = raw.length;
-      const showing = limited.length;
-      const sum = raw.reduce((acc, d) => acc + (d.base_reward || 0), 0);
-      chartMeta.textContent = `${formatDate(date)} • ${showing}/${total} delegators • ${sum.toFixed(3)} HIVE distributable`;
-
-      renderChartForDate(limited);
-    }
-
-    dateSelect.addEventListener('change', updateChart);
-    topSelect.addEventListener('change', updateChart);
-    filterInput.addEventListener('input', updateChart);
-
-    // Render initial chart
-    updateChart();
 
     // SBI Log
     const sbiTbody = document.getElementById('sbi-tbody');
