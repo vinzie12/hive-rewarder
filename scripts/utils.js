@@ -39,11 +39,34 @@ function saveJSON(filename, data) {
 
 /**
  * Determine global multiplier based on total delegation HP.
- * < 10,000 HP → x3
- * >= 10,000 HP → x1
+ * < 10,000 HP → 3.0
+ * 10,000–20,000 HP → linearly 3.0 → 2.0
+ * 20,000–30,000 HP → linearly 2.0 → 1.0
+ * 30,000–40,000 HP → linearly 1.0 → 0.5
+ * >= 40,000 HP → 0.5
  */
 function getMultiplier(totalDelegationHP) {
-  return totalDelegationHP < 10000 ? 3 : 1;
+  const totalHP = Number(totalDelegationHP) || 0;
+
+  let m;
+  if (totalHP < 10000) {
+    m = 3.0;
+  } else if (totalHP < 20000) {
+    // 3.0 down to 2.0
+    m = 3 - ((totalHP - 10000) / 10000);
+  } else if (totalHP < 30000) {
+    // 2.0 down to 1.0
+    m = 2 - ((totalHP - 20000) / 10000);
+  } else if (totalHP < 40000) {
+    // 1.0 down to 0.5
+    m = 1 - ((totalHP - 30000) / 10000) * 0.5;
+  } else {
+    m = 0.5;
+  }
+
+  // Clamp and round
+  m = Math.max(0.5, m);
+  return parseFloat(m.toFixed(3));
 }
 
 /**

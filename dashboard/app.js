@@ -23,7 +23,23 @@ async function loadJSON(filename) {
 }
 
 function getMultiplier(totalDelegationHP) {
-  return totalDelegationHP < 10000 ? 3 : 1;
+  const totalHP = Number(totalDelegationHP) || 0;
+
+  let m;
+  if (totalHP < 10000) {
+    m = 3.0;
+  } else if (totalHP < 20000) {
+    m = 3 - ((totalHP - 10000) / 10000);
+  } else if (totalHP < 30000) {
+    m = 2 - ((totalHP - 20000) / 10000);
+  } else if (totalHP < 40000) {
+    m = 1 - ((totalHP - 30000) / 10000) * 0.5;
+  } else {
+    m = 0.5;
+  }
+
+  m = Math.max(0.5, m);
+  return Number(m.toFixed(3));
 }
 
 function getRankClass(rank) {
