@@ -21,7 +21,7 @@ function loadJSON(filename, fallback) {
     return fallback;
   }
   try {
-    return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    return JSON.parse(fs.readFileSync(filePath, 'utf-8').replace(/^\uFEFF/, ''));
   } catch (err) {
     console.error(`❌ Error reading ${filename}:`, err.message);
     return fallback;
