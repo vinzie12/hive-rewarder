@@ -616,24 +616,19 @@ td.purple { color: var(--purple); }
 }
 
 /* ─── Chart Container ─── */
+/* NEW */
 .chart-container {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.5rem;
   box-shadow: var(--shadow);
-  max-height: 600px;
-  overflow: auto;
+  overflow: visible;
 }
 
+/* NEW - replace with this */
 .bar-chart {
-  display: flex;
-  flex-direction: column;  /* changed from row to column for hbar layout */
-  gap: 6px;
-  padding-top: 0.25rem;
-  min-width: fit-content;
   width: 100%;
-  /* height: 220px  ← removed */
 }
 
 .bar-group {
