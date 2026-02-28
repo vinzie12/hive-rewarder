@@ -811,6 +811,7 @@ td.purple { color: var(--purple); }
   display: grid;
   gap: 0.6rem;
   padding: 0.25rem;
+  min-width: fit-content;
 }
 
 .hbar-row {
