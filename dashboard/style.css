@@ -1015,4 +1015,24 @@ td.purple { color: var(--purple); }
   .bar-group {
     width: 24px;
   }
+  /* FORCE FIX */
+.chart-container {
+  max-height: none !important;
+  overflow: visible !important;
+  height: auto !important;
+}
+
+.bar-chart {
+  height: auto !important;
+  max-height: none !important;
+  align-items: stretch !important;
+  flex-direction: column !important;
+  overflow: visible !important;
+}
+
+.hbar-list {
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+}
 }
