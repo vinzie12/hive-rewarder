@@ -254,7 +254,7 @@ function buildDelegationHistory(rawHistory, totalVestingFundHive, totalVestingSh
 
 function loadExistingDelegationHistory() {
   if (fs.existsSync(DELEGATION_HISTORY_FILE)) {
-    const data = JSON.parse(fs.readFileSync(DELEGATION_HISTORY_FILE, 'utf8'));
+    const data = JSON.parse(fs.readFileSync(DELEGATION_HISTORY_FILE, 'utf8').replace(/^\uFEFF/, ''));
     log(`💾 Loaded existing delegation_history.json (${Object.keys(data).length} delegators)`);
     return data;
   }
@@ -503,7 +503,7 @@ async function main() {
     const PAYOUT_HISTORY_FILE = path.join(__dirname, '..', 'data', 'payout_history.json');
     let payoutHistory = [];
     if (fs.existsSync(PAYOUT_HISTORY_FILE)) {
-      const parsed = JSON.parse(fs.readFileSync(PAYOUT_HISTORY_FILE, 'utf8'));
+      const parsed = JSON.parse(fs.readFileSync(PAYOUT_HISTORY_FILE, 'utf8').replace(/^\uFEFF/, ''));
       // Ensure it's an array (handle corrupted or empty object files)
       payoutHistory = Array.isArray(parsed) ? parsed : [];
       log(`💾 Loaded existing payout_history.json (${payoutHistory.length} entries)`);
