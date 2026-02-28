@@ -622,7 +622,8 @@ td.purple { color: var(--purple); }
   border-radius: var(--radius);
   padding: 1.5rem;
   box-shadow: var(--shadow);
-  overflow-x: auto;
+  max-height: 600px;
+  overflow: auto;
 }
 
 .bar-chart {
@@ -803,12 +804,6 @@ td.purple { color: var(--purple); }
   .chart-meta {
     max-width: 100%;
   }
-}
-
-/* ─── Chart Container (Scrollable for Many Rows) ─── */
-.chart-container {
-  max-height: 600px;
-  overflow-y: auto;
 }
 
 /* ─── Horizontal Bar Chart ─── */
