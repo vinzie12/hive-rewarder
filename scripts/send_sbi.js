@@ -50,7 +50,7 @@ hive.api.setOptions({ url: HIVE_NODES[currentNodeIndex] });
  * Memo format: @sponsor:@beneficiary
  */
 async function sendSBI(delegator, retries = 3) {
-  const memo = `@${HIVE_USER}:@${delegator}`;
+  const memo = `@vinzie1:@${delegator}`;
   const amount = `${SBI_CHUNK.toFixed(3)} HIVE`;
 
   if (IS_DRY_RUN) {
