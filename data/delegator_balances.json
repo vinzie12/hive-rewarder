@@ -1,66 +1,66 @@
 {
   "_meta": {
-    "last_accumulated_date": "2026-06-30"
+    "last_accumulated_date": "2026-07-01"
   },
   "gretelarmfeg": {
-    "balance": 13.652,
-    "total_sent": 72,
-    "last_updated": "2026-07-01"
+    "balance": 0.221,
+    "total_sent": 86,
+    "last_updated": "2026-07-02"
   },
   "suteru": {
-    "balance": 13.478,
-    "total_sent": 67,
-    "last_updated": "2026-07-01"
+    "balance": 0.016,
+    "total_sent": 81,
+    "last_updated": "2026-07-02"
   },
   "diosarich": {
-    "balance": 12.273,
-    "total_sent": 51,
-    "last_updated": "2026-07-01"
+    "balance": 9.784,
+    "total_sent": 54,
+    "last_updated": "2026-07-02"
   },
   "vinzie1": {
-    "balance": 62.498,
+    "balance": 62.913,
     "total_sent": 0,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "katiekate86": {
-    "balance": 7.038,
+    "balance": 7.297,
     "total_sent": 32,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "jeanieviv84": {
-    "balance": 5.419,
+    "balance": 5.628,
     "total_sent": 26,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "dreamrona": {
-    "balance": 7.13,
+    "balance": 7.437,
     "total_sent": 29,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "vvodjiu": {
-    "balance": 9.538,
+    "balance": 9.923,
     "total_sent": 29,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "blueoctopus": {
-    "balance": 4.162,
+    "balance": 4.317,
     "total_sent": 16,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "hopefulsoul": {
-    "balance": 2.904,
+    "balance": 3.003,
     "total_sent": 12,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "ronimarie82": {
-    "balance": 2.747,
+    "balance": 2.825,
     "total_sent": 9,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "lj1728": {
-    "balance": 7.95,
+    "balance": 8.257,
     "total_sent": 24,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "antonette": {
     "balance": 0.421,
@@ -68,29 +68,29 @@
     "last_updated": "2026-05-26"
   },
   "krissymayol": {
-    "balance": 1.861,
+    "balance": 1.913,
     "total_sent": 6,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "wanderelle": {
-    "balance": 1.859,
+    "balance": 1.911,
     "total_sent": 6,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "crstypatata": {
-    "balance": 1.77,
+    "balance": 1.822,
     "total_sent": 6,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "mayt": {
-    "balance": 1.77,
+    "balance": 1.822,
     "total_sent": 6,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "lolitaanana001": {
-    "balance": 3.039,
+    "balance": 3.344,
     "total_sent": 9,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "jocabanero4": {
     "balance": 0.77,
@@ -98,84 +98,84 @@
     "last_updated": "2026-04-22"
   },
   "izyllah-aeon": {
-    "balance": 1.258,
+    "balance": 1.306,
     "total_sent": 6,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "saijan19": {
-    "balance": 0.925,
+    "balance": 0.951,
     "total_sent": 3,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "celestyne15": {
-    "balance": 0.902,
+    "balance": 0.928,
     "total_sent": 3,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "heymariel": {
-    "balance": 0.899,
+    "balance": 0.925,
     "total_sent": 3,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "rabino7515": {
-    "balance": 0.895,
+    "balance": 0.921,
     "total_sent": 3,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "desyah07": {
-    "balance": 1.153,
+    "balance": 1.174,
     "total_sent": 2,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "gracefulwrites": {
-    "balance": 1.36,
+    "balance": 1.376,
     "total_sent": 1,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "rizz26": {
-    "balance": 1.231,
+    "balance": 1.273,
     "total_sent": 2,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "daileen23": {
-    "balance": 1.327,
+    "balance": 1.342,
     "total_sent": 1,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "arriane001": {
-    "balance": 0.75,
+    "balance": 0.776,
     "total_sent": 2,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "sammify": {
-    "balance": 0.398,
+    "balance": 0.407,
     "total_sent": 1,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "joanna112890": {
-    "balance": 1.164,
+    "balance": 1.172,
     "total_sent": 0,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "yhanyx87": {
-    "balance": 1.099,
+    "balance": 1.106,
     "total_sent": 0,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "honeyjean24": {
-    "balance": 0.789,
+    "balance": 0.794,
     "total_sent": 0,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "segundolhou29": {
     "balance": 0,
     "total_sent": 0,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "hmayak": {
-    "balance": 0.711,
+    "balance": 0.716,
     "total_sent": 0,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "olang23": {
     "balance": 0.333,
@@ -198,13 +198,13 @@
     "last_updated": "2026-04-22"
   },
   "jovan1978": {
-    "balance": 0.983,
+    "balance": 1.01,
     "total_sent": 0,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   },
   "mdsahin111": {
-    "balance": 2.392,
+    "balance": 2.494,
     "total_sent": 0,
-    "last_updated": "2026-07-01"
+    "last_updated": "2026-07-02"
   }
 }
