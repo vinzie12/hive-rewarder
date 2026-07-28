@@ -1,183 +1,183 @@
 {
-  "date": "2026-07-26",
-  "total_delegation_hp": 11503.844,
-  "total_curation_hive": 2.189914,
-  "distributable_hive": 2.080418,
+  "date": "2026-07-27",
+  "total_delegation_hp": 11504.739,
+  "total_curation_hive": 3.191328,
+  "distributable_hive": 3.031762,
   "delegators": [
     {
       "name": "gretelarmfeg",
-      "hp": 1121.181,
-      "base_reward": 0.202761
+      "hp": 1121.268,
+      "base_reward": 0.29548
     },
     {
       "name": "katiekate86",
-      "hp": 1101.952,
-      "base_reward": 0.199283
+      "hp": 1102.037,
+      "base_reward": 0.290412
     },
     {
       "name": "suteru",
-      "hp": 1059.49,
-      "base_reward": 0.191604
+      "hp": 1059.573,
+      "base_reward": 0.279222
     },
     {
       "name": "diosarich",
-      "hp": 1007.504,
-      "base_reward": 0.182203
+      "hp": 1007.583,
+      "base_reward": 0.265521
     },
     {
       "name": "lj1728",
-      "hp": 1002.22,
-      "base_reward": 0.181247
+      "hp": 1002.298,
+      "base_reward": 0.264128
     },
     {
       "name": "lolitaanana001",
-      "hp": 1001.372,
-      "base_reward": 0.181094
+      "hp": 1001.45,
+      "base_reward": 0.263905
     },
     {
       "name": "vinzie1",
-      "hp": 818.128,
-      "base_reward": 0.147955
+      "hp": 818.191,
+      "base_reward": 0.215612
     },
     {
       "name": "dreamrona",
-      "hp": 803.454,
-      "base_reward": 0.145301
+      "hp": 803.516,
+      "base_reward": 0.211745
     },
     {
       "name": "vvodjiu",
-      "hp": 758.937,
-      "base_reward": 0.13725
+      "hp": 758.996,
+      "base_reward": 0.200013
     },
     {
       "name": "mayt",
-      "hp": 501.145,
-      "base_reward": 0.09063
+      "hp": 501.184,
+      "base_reward": 0.132073
     },
     {
       "name": "jeanieviv84",
-      "hp": 411.292,
-      "base_reward": 0.07438
+      "hp": 411.324,
+      "base_reward": 0.108393
     },
     {
       "name": "blueoctopus",
-      "hp": 304.446,
-      "base_reward": 0.055058
+      "hp": 304.469,
+      "base_reward": 0.080235
     },
     {
       "name": "mdsahin111",
-      "hp": 200.806,
-      "base_reward": 0.036315
+      "hp": 200.822,
+      "base_reward": 0.052921
     },
     {
       "name": "hopefulsoul",
-      "hp": 195.117,
-      "base_reward": 0.035286
+      "hp": 195.132,
+      "base_reward": 0.051422
     },
     {
       "name": "ronimarie82",
-      "hp": 153.853,
-      "base_reward": 0.027824
+      "hp": 153.865,
+      "base_reward": 0.040547
     },
     {
       "name": "krissymayol",
-      "hp": 102.954,
-      "base_reward": 0.018619
+      "hp": 102.962,
+      "base_reward": 0.027133
     },
     {
       "name": "wanderelle",
-      "hp": 102.888,
-      "base_reward": 0.018607
+      "hp": 102.896,
+      "base_reward": 0.027115
     },
     {
       "name": "crstypatata",
-      "hp": 101.742,
-      "base_reward": 0.0184
+      "hp": 101.75,
+      "base_reward": 0.026813
     },
     {
       "name": "chinito",
-      "hp": 100.05,
-      "base_reward": 0.018094
+      "hp": 100.058,
+      "base_reward": 0.026368
     },
     {
       "name": "izyllah-aeon",
-      "hp": 95.077,
-      "base_reward": 0.017194
+      "hp": 95.084,
+      "base_reward": 0.025057
     },
     {
       "name": "rizz26",
-      "hp": 82.029,
-      "base_reward": 0.014835
+      "hp": 82.035,
+      "base_reward": 0.021618
     },
     {
       "name": "jovan1978",
-      "hp": 52.259,
-      "base_reward": 0.009451
+      "hp": 52.263,
+      "base_reward": 0.013772
     },
     {
       "name": "saijan19",
-      "hp": 51.444,
-      "base_reward": 0.009303
+      "hp": 51.448,
+      "base_reward": 0.013558
     },
     {
       "name": "celestyne15",
-      "hp": 51.105,
-      "base_reward": 0.009242
+      "hp": 51.109,
+      "base_reward": 0.013468
     },
     {
       "name": "heymariel",
-      "hp": 51.07,
-      "base_reward": 0.009236
+      "hp": 51.074,
+      "base_reward": 0.013459
     },
     {
       "name": "rabino7515",
-      "hp": 50.988,
-      "base_reward": 0.009221
+      "hp": 50.992,
+      "base_reward": 0.013437
     },
     {
       "name": "arriane001",
-      "hp": 50.336,
-      "base_reward": 0.009103
+      "hp": 50.34,
+      "base_reward": 0.013266
     },
     {
       "name": "desyah07",
-      "hp": 41.212,
-      "base_reward": 0.007453
+      "hp": 41.215,
+      "base_reward": 0.010861
     },
     {
       "name": "gracefulwrites",
-      "hp": 30.908,
-      "base_reward": 0.00559
+      "hp": 30.911,
+      "base_reward": 0.008146
     },
     {
       "name": "daileen23",
-      "hp": 30.524,
-      "base_reward": 0.00552
+      "hp": 30.526,
+      "base_reward": 0.008044
     },
     {
       "name": "sammify",
-      "hp": 18.342,
-      "base_reward": 0.003317
+      "hp": 18.344,
+      "base_reward": 0.004834
     },
     {
       "name": "joanna112890",
-      "hp": 15.19,
-      "base_reward": 0.002747
+      "hp": 15.192,
+      "base_reward": 0.004003
     },
     {
       "name": "yhanyx87",
-      "hp": 14.408,
-      "base_reward": 0.002606
+      "hp": 14.409,
+      "base_reward": 0.003797
     },
     {
       "name": "honeyjean24",
-      "hp": 10.309,
-      "base_reward": 0.001864
+      "hp": 10.31,
+      "base_reward": 0.002717
     },
     {
       "name": "hmayak",
-      "hp": 10.114,
-      "base_reward": 0.001829
+      "hp": 10.115,
+      "base_reward": 0.002665
     },
     {
       "name": "segundolhou29",
