@@ -1,66 +1,66 @@
 {
   "_meta": {
-    "last_accumulated_date": "2026-10-22"
+    "last_accumulated_date": "2026-10-23"
   },
   "gretelarmfeg": {
-    "balance": 2.646,
-    "total_sent": 153,
-    "last_updated": "2026-10-23"
+    "balance": 0.217,
+    "total_sent": 156,
+    "last_updated": "2026-10-24"
   },
   "suteru": {
-    "balance": 1.879,
-    "total_sent": 143,
-    "last_updated": "2026-10-23"
+    "balance": 0.347,
+    "total_sent": 145,
+    "last_updated": "2026-10-24"
   },
   "diosarich": {
-    "balance": 2.503,
-    "total_sent": 122,
-    "last_updated": "2026-10-23"
+    "balance": 0.948,
+    "total_sent": 124,
+    "last_updated": "2026-10-24"
   },
   "vinzie1": {
-    "balance": 164.327,
+    "balance": 165.427,
     "total_sent": 0,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "katiekate86": {
-    "balance": 2.579,
-    "total_sent": 100,
-    "last_updated": "2026-10-23"
+    "balance": 0.066,
+    "total_sent": 103,
+    "last_updated": "2026-10-24"
   },
   "jeanieviv84": {
-    "balance": 1.412,
-    "total_sent": 55,
-    "last_updated": "2026-10-23"
+    "balance": 0.594,
+    "total_sent": 56,
+    "last_updated": "2026-10-24"
   },
   "dreamrona": {
-    "balance": 2.602,
+    "balance": 3.042,
     "total_sent": 84,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "vvodjiu": {
-    "balance": 3.954,
+    "balance": 4.841,
     "total_sent": 134,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "blueoctopus": {
-    "balance": 0.669,
+    "balance": 0.803,
     "total_sent": 38,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "hopefulsoul": {
-    "balance": 0.763,
+    "balance": 0.849,
     "total_sent": 26,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "ronimarie82": {
-    "balance": 1.096,
+    "balance": 1.164,
     "total_sent": 20,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "lj1728": {
-    "balance": 4.159,
+    "balance": 4.602,
     "total_sent": 88,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "antonette": {
     "balance": 0.055,
@@ -68,14 +68,14 @@
     "last_updated": "2026-08-25"
   },
   "krissymayol": {
-    "balance": 1.119,
+    "balance": 1.164,
     "total_sent": 13,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "wanderelle": {
-    "balance": 1.112,
+    "balance": 1.157,
     "total_sent": 13,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "crstypatata": {
     "balance": 0.771,
@@ -83,14 +83,14 @@
     "last_updated": "2026-10-20"
   },
   "mayt": {
-    "balance": 3.539,
+    "balance": 3.76,
     "total_sent": 34,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "lolitaanana001": {
-    "balance": 6.289,
+    "balance": 6.731,
     "total_sent": 63,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "jocabanero4": {
     "balance": 0.77,
@@ -98,79 +98,79 @@
     "last_updated": "2026-04-22"
   },
   "izyllah-aeon": {
-    "balance": 1.038,
+    "balance": 1.08,
     "total_sent": 12,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "saijan19": {
-    "balance": 1.048,
+    "balance": 1.071,
     "total_sent": 6,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "celestyne15": {
-    "balance": 1.014,
+    "balance": 1.037,
     "total_sent": 6,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "heymariel": {
-    "balance": 1.01,
+    "balance": 1.033,
     "total_sent": 6,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "rabino7515": {
-    "balance": 0.999,
+    "balance": 1.022,
     "total_sent": 6,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "desyah07": {
-    "balance": 0.656,
+    "balance": 0.674,
     "total_sent": 5,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "gracefulwrites": {
-    "balance": 0.239,
+    "balance": 0.253,
     "total_sent": 4,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "rizz26": {
-    "balance": 1.222,
+    "balance": 1.258,
     "total_sent": 7,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "daileen23": {
-    "balance": 0.323,
+    "balance": 0.338,
     "total_sent": 4,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "arriane001": {
-    "balance": 0.807,
+    "balance": 0.829,
     "total_sent": 5,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "sammify": {
-    "balance": 0.51,
+    "balance": 0.518,
     "total_sent": 2,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "joanna112890": {
-    "balance": 0.089,
+    "balance": 0.096,
     "total_sent": 2,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "yhanyx87": {
-    "balance": 0.978,
+    "balance": 0.984,
     "total_sent": 1,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "honeyjean24": {
-    "balance": 0.414,
+    "balance": 0.419,
     "total_sent": 1,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "segundolhou29": {
     "balance": 0,
     "total_sent": 0,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "hmayak": {
     "balance": 0.269,
@@ -198,24 +198,24 @@
     "last_updated": "2026-04-22"
   },
   "jovan1978": {
-    "balance": 1.159,
+    "balance": 1.182,
     "total_sent": 3,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "mdsahin111": {
-    "balance": 1.596,
+    "balance": 1.685,
     "total_sent": 13,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "chinito": {
-    "balance": 0.599,
+    "balance": 0.643,
     "total_sent": 4,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "nesbi94": {
-    "balance": 2.024,
+    "balance": 2.112,
     "total_sent": 2,
-    "last_updated": "2026-10-23"
+    "last_updated": "2026-10-24"
   },
   "daily.life": {
     "balance": 1.399,
